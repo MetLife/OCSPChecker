@@ -12,17 +12,14 @@ __Python__ - Python 3.7 (64-bit) and above.
 
 ## Installation
 
-```pip install ocsp-statuschecker```
+```pip install ocsp-checker```
 
 
 ## Usage
 
 ```
-from ocspchecker import ocspchecker
-
-ocsp_request = ocspchecker.get_ocsp_status("github.com")
-
-
+>>> from ocspchecker import ocspchecker
+>>> ocsp_request = ocspchecker.get_ocsp_status("github.com")
 ```
 
 ## Sample Output
@@ -30,20 +27,13 @@ ocsp_request = ocspchecker.get_ocsp_status("github.com")
 Sample output below, let me know if you want to add more fields/information to the output.
 
 ```
-[
-  "Target": "microsoft.com",
-  "IP": "104.215.148.63",
-  "OCSP URL": "http://ocsp.msocsp.com",
-  "OCSP Status": "OCSPCertStatus.GOOD"
-]
+['Host: github.com:443', 'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']
 ```
 
 PLEASE NOTE: If you run this on a network with a MITM SSL proxy, you may receive unintended results (see below):
 ```
-{
-  "Error Type": "Certificate Authority Information Access (AIA) Extension Missing",
-  "Message": "No <ObjectIdentifier(oid=1.3.6.1.5.5.7.1.1, name=authorityInfoAccess)> extension was found for netflix.com. Possible MITM SSL Proxy"
-}
+["Error Type": "Certificate Authority Information Access (AIA) Extension Missing",
+ "Message": "No <ObjectIdentifier(oid=1.3.6.1.5.5.7.1.1, name=authorityInfoAccess)> extension was found for netflix.com. Possible MITM SSL Proxy"]
 ```
 
 ## Feedback

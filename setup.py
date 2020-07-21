@@ -8,17 +8,17 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name="ocsp-checker",
-    version="0.1.0",
+    version="1.1.0",
     description="Library used to check the OCSP revocation status for a x509 digital certificate.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="tbd",
+    url="https://github.com/MetLife/OCSPChecker",
     author="Joe Gatt",
     author_email="joe@metlife.com",
     license="MIT",
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "License :: OSI Approved :: Apache 2.0",
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",

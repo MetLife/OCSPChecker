@@ -93,6 +93,9 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         underlying_socket=soc,
         ssl_verify=OpenSslVerifyEnum.NONE
     )
+    
+    # Add Server Name Indication (SNI) extension to the CLIENT HELLO
+    ssl_client.set_tlsext_host_name(host)
 
     try:
         ssl_client.do_handshake()
@@ -140,7 +143,7 @@ def extract_ocsp_url(cert_chain: List[str]) -> str:
 
     except ExtensionNotFound:
         raise ValueError(
-            "Certificate Authority Information Access (AIA) Extension Missing"
+            "Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
         ) from None
 
     return ocsp_url

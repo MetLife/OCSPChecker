@@ -93,6 +93,9 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         underlying_socket=soc,
         ssl_verify=OpenSslVerifyEnum.NONE
     )
+    
+    # Add Server Name Indication (SNI) extension to the CLIENT HELLO
+    ssl_client.set_tlsext_host_name(host)
 
     try:
         ssl_client.do_handshake()

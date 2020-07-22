@@ -8,7 +8,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name="ocsp-checker",
-    version="1.1.0",
+    version="1.2.0",
     description="Library used to check the OCSP revocation status for a x509 digital certificate.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -31,6 +31,6 @@ setup(
         "cryptography==2.9.2",
         "nassl==3.0.0",
         "requests>=2.24",
-        "validators==0.15.0"
+        "validators==0.16.0"
         ],
 )

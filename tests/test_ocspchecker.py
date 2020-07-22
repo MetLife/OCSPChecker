@@ -35,12 +35,12 @@ def test_get_cert_chain_host_timeout():
 def test_get_cert_chain_success():
     """ Validate the issuer for microsoft.com with ms_pem """
 
-    host = "microsoft.com"
+    host = "github.com"
     port = 443
 
-    ms = get_certificate_chain(host, port)
+    github = get_certificate_chain(host, port)
 
-    assert ms[1] == certs.ms_issuer_pem
+    assert github[1] == certs.github_issuer_pem
 
 
 def test_missing_ocsp_extension():
@@ -195,3 +195,15 @@ def test_end_to_end_test_host_timeout():
 
     assert ocsp_request == ['Host: espn.com:65534',
                             'Error: Connection to espn.com:65534 timed out.']
+
+
+@pytest.mark.parametrize("root_ca", certs.cert_authorities)
+def test_a_cert_from_each_root_ca(root_ca):
+
+    try:
+        ocsp_request = get_ocsp_status(root_ca)
+        
+    except Exception as err:
+        raise err
+
+    assert ocsp_request[2] == 'OCSP Status: GOOD'

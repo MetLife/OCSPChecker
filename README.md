@@ -32,8 +32,7 @@ Sample output below, let me know if you want to add more fields/information to t
 
 PLEASE NOTE: If you run this on a network with a MITM SSL proxy, you may receive unintended results (see below):
 ```
-["Error Type": "Certificate Authority Information Access (AIA) Extension Missing",
- "Message": "No <ObjectIdentifier(oid=1.3.6.1.5.5.7.1.1, name=authorityInfoAccess)> extension was found for netflix.com. Possible MITM SSL Proxy"]
+["Error: Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."]
 ```
 
 ## Feedback

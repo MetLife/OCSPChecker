@@ -143,7 +143,7 @@ def extract_ocsp_url(cert_chain: List[str]) -> str:
 
     except ExtensionNotFound:
         raise ValueError(
-            "Certificate Authority Information Access (AIA) Extension Missing"
+            "Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
         ) from None
 
     return ocsp_url

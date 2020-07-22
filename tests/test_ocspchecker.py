@@ -53,7 +53,7 @@ def test_missing_ocsp_extension():
     with pytest.raises(Exception) as excinfo:
         extract_ocsp_url(cert_chain)
 
-    assert str(excinfo.value) == "Certificate Authority Information Access (AIA) Extension Missing"
+    assert str(excinfo.value) == "Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
 
 
 def test_extract_ocsp_url_success():

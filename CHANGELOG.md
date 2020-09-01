@@ -7,3 +7,8 @@
 - Add Server Name Indication (SNI) support
 - Add tests to cover each root certificate authority in use
 - Fix MITM proxy error reporting
+
+# v1.4.0
+- Added the ability to call from the command line
+- Updated cryptography and validators
+- Some pylint fixes

@@ -1,8 +1,8 @@
-# OCSP-Requester
+# OCSP-Checker
 
 ## Overview
 
-OCSP-Requester is a python package based on Alban Diquet's [nassl](https://github.com/nabla-c0d3/nassl) wrapper and the Python Cryptographic Authority's [cryptography](https://github.com/pyca/cryptography) package. Relying on a web browser to check the revocation status of a x509 digital certificate [has](https://www.imperialviolet.org/2014/04/19/revchecking.html) [been](https://www.imperialviolet.org/2014/04/29/revocationagain.html) [broken](https://scotthelme.co.uk/revocation-is-broken/) from the beginning, and validating certificates outside of the web browser is a manual process. OCSP-Requester aims to solve this by providing an automated means to check the [OCSP](https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol) revocation status for a x509 digital certificate.
+OCSP-Checker is a python package based on Alban Diquet's [nassl](https://github.com/nabla-c0d3/nassl) wrapper and the Python Cryptographic Authority's [cryptography](https://github.com/pyca/cryptography) package. Relying on a web browser to check the revocation status of a x509 digital certificate [has](https://www.imperialviolet.org/2014/04/19/revchecking.html) [been](https://www.imperialviolet.org/2014/04/29/revocationagain.html) [broken](https://scotthelme.co.uk/revocation-is-broken/) from the beginning, and validating certificates outside of the web browser is a manual process. OCSP-Checker aims to solve this by providing an automated means to check the [OCSP](https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol) revocation status for a x509 digital certificate.
 
 
 ## Pre-requisites
@@ -34,6 +34,25 @@ PLEASE NOTE: If you run this on a network with a MITM SSL proxy, you may receive
 ```
 ["Error: Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."]
 ```
+
+## Command Line Usage
+
+OCSP-Checker can now be used at the command line. The format is:
+```
+usage: ocsp-checker [-h] --target target [--port port]
+
+Check the OCSP revocation status for a x509 digital certificate.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --target target, -t target
+                        The target to test
+  --port port, -p port  The port to test (default is 443)
+```
+
+For example:
+
+``` ocspchecker -t github.com ```
 
 ## Feedback
 

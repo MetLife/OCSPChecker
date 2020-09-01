@@ -35,6 +35,25 @@ PLEASE NOTE: If you run this on a network with a MITM SSL proxy, you may receive
 ["Error: Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."]
 ```
 
+## Command Line Usage
+
+OCSP-Checker can now be used at the command line. The format is:
+```
+usage: ocsp-checker [-h] --target target [--port port]
+
+Check the OCSP revocation status for a x509 digital certificate.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --target target, -t target
+                        The target to test
+  --port port, -p port  The port to test (default is 443)
+```
+
+For example:
+
+``` ocspchecker -t github.com ```
+
 ## Feedback
 
 Send me mail at joe@metlife.com

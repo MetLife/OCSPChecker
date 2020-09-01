@@ -1,4 +1,6 @@
 """ Tests """
+import subprocess
+
 import pytest
 
 from ocspchecker.ocspchecker import (build_ocsp_request, get_certificate_chain,
@@ -49,11 +51,12 @@ def test_missing_ocsp_extension():
     host = "edellroot.badssl.com"
     port = 443
     cert_chain = get_certificate_chain(host, port)
+    error = "Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
 
     with pytest.raises(Exception) as excinfo:
         extract_ocsp_url(cert_chain)
 
-    assert str(excinfo.value) == "Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
+    assert str(excinfo.value) == error
 
 
 def test_extract_ocsp_url_success():
@@ -199,11 +202,30 @@ def test_end_to_end_test_host_timeout():
 
 @pytest.mark.parametrize("root_ca", certs.cert_authorities)
 def test_a_cert_from_each_root_ca(root_ca):
+    """ Test a cert from each root CA to ensure test coverage """
 
     try:
         ocsp_request = get_ocsp_status(root_ca)
-        
+
     except Exception as err:
         raise err
 
     assert ocsp_request[2] == 'OCSP Status: GOOD'
+
+
+def test_commandline_end_to_end_test():
+    """ Test the command line end to end """
+
+    _check = None
+    command = ["ocspchecker", "-t", "github.com"]
+    result = "['Host: github.com:443', 'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']"
+
+    try:
+        _check = subprocess.run(command, capture_output=True, check=True, text=True)
+
+    except subprocess.SubprocessError as err:
+        print(err)  # This will fail if it can't find ocsp-checker on the system
+
+    # Received valid return code and no errors
+    assert _check.returncode == 0 and _check.stdout.strip() == result
+    

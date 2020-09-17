@@ -5,7 +5,8 @@
  For a short-term fix, I will use nassl to grab the full cert chain. """
 
 from socket import AF_INET, gaierror, socket, SOCK_STREAM, timeout
-from typing import List
+from typing import Any, List
+from urllib.parse import urlparse
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -15,10 +16,10 @@ from cryptography.x509 import ExtensionOID, ExtensionNotFound, ocsp
 from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum, SslClient
 from nassl._nassl import OpenSSLError, WantReadError, WantX509LookupError
 import requests
-from validators import url
+from validators import domain, url
 
 
-def get_ocsp_status(host: str, port: int = 443) -> list:
+def get_ocsp_status(host: str, port: Any = None) -> list:
     """ Main function with two inputs: host, and port.
     Port defaults to TCP 443 """
 
@@ -27,6 +28,26 @@ def get_ocsp_status(host: str, port: int = 443) -> list:
 
     # pylint: disable=W0703
     # All of the exceptions in this function are passed-through
+
+    # Validate port
+    if port is None:
+        port = 443
+    else:
+        try:
+            port = verify_port(port)
+
+        except Exception as err:
+            results.append("Error: " + str(err))
+            return results
+
+    # Sanitize host
+    try:
+        host = verify_host(host)
+
+    except Exception as err:
+        results.append("Error: " + str(err))
+        return results
+
     try:
         cert_chain = get_certificate_chain(host, port)
 
@@ -71,7 +92,6 @@ def get_ocsp_status(host: str, port: int = 443) -> list:
 def get_certificate_chain(host: str, port: int) -> List[str]:
 
     """ Connect to the host on the port and obtain certificate chain.
-     TODO: Strip http(s) from host and make sure port is a valid int.
      TODO: Tests against WantReadError and WantX509LookupError needed. """
 
     cert_chain = []
@@ -87,6 +107,12 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
 
     except timeout:
         raise Exception(f"Connection to {host}:{port} timed out.") from None
+
+    except OverflowError:
+        raise Exception(f"Illegal port: {port}. Port must be between 0-65535.")
+
+    except TypeError:
+        raise Exception(f"Illegal port: {port}. Port must be between 0-65535.")
 
     ssl_client = SslClient(
         ssl_version=OpenSslVersionEnum.SSLV23,
@@ -230,3 +256,34 @@ def extract_ocsp_result(ocsp_response):
 
     except ValueError as err:
         return f"{str(err)}"
+
+
+def verify_port(port: Any) -> int:
+    """ Check port for type and validity """
+
+    if not isinstance(port, int):
+        if port.isnumeric() is False:
+            raise Exception(f"Invalid port: '{port}'. Port must be between 0-65535.")
+
+    _port = int(port)
+
+    if _port > 65535 or _port == 0:
+        raise Exception(f"Invalid port: '{port}'. Port must be between 0-65535.")
+
+    return _port
+
+
+def verify_host(host: str) -> str:
+    """ Parse a DNS name to ensure it does not contain http(s) """
+    parsed_name = urlparse(host)
+
+    # The below parses out http(s) from a name
+    host_candidate = parsed_name.netloc
+    if host_candidate == "":
+        host_candidate = parsed_name.path
+
+    # The below ensures a valid domain was supplied
+    if not domain(host_candidate):
+        raise Exception("Invalid FQDN", f"{host} is not a valid FQDN")
+
+    return host_candidate

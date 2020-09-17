@@ -13,8 +13,8 @@ arg_parser = argparse.ArgumentParser(prog="ocsp-checker",
 arg_parser.add_argument("--target", "-t", metavar="target", type=str,
                         required=True, help='The target to test')
 
-arg_parser.add_argument("--port", "-p", metavar="port", type=int,
-                        required=False, default=443, help='The port to test (default is 443)')
+arg_parser.add_argument("--port", "-p", metavar="port", type=str,
+                        required=False, default="443", help='The port to test (default is 443)')
 
 
 def main() -> None:
@@ -30,4 +30,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-    

@@ -228,4 +228,43 @@ def test_commandline_end_to_end_test():
 
     # Received valid return code and no errors
     assert _check.returncode == 0 and _check.stdout.strip() == result
-    
+
+
+def test_bad_port_overflow():
+    """ Validate passing a bad port results in failure """
+
+    host = "espn.com"
+    ocsp_request = get_ocsp_status(host, 80000)
+
+    assert ocsp_request == ["Host: espn.com:80000",
+                            "Error: Invalid port: '80000'. Port must be between 0-65535."]
+
+
+def test_bad_port_typeerror():
+    """ Validate passing a bad port results in failure """
+
+    host = "espn.com"
+    ocsp_request = get_ocsp_status(host, "a")  # type: ignore
+
+    assert ocsp_request == ["Host: espn.com:a",
+                            "Error: Invalid port: 'a'. Port must be between 0-65535."]
+
+
+def test_strip_http_from_host():
+    """ Validate stripping http from host """
+
+    host = "http://github.com"
+    ocsp_request = get_ocsp_status(host, 443)
+
+    assert ocsp_request == ['Host: http://github.com:443',\
+                           'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']
+
+
+def test_strip_https_from_host():
+    """ Validate stripping https from host """
+
+    host = "https://github.com"
+    ocsp_request = get_ocsp_status(host, 443)
+
+    assert ocsp_request == ['Host: https://github.com:443',\
+                           'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']

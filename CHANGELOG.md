@@ -12,3 +12,7 @@
 - Added the ability to call from the command line
 - Updated cryptography and validators
 - Some pylint fixes
+
+# v1.5.0
+- Fixed an uncaught exception when port is > 65535 or not numeric
+- Parse out http(s) when submitting a request

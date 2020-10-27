@@ -1,4 +1,4 @@
-cryptography==3.1
+cryptography==3.2
 nassl==3.0.0
 requests==2.24.0
 validators==0.18.0

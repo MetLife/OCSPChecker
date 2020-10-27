@@ -33,7 +33,7 @@ setup(
     entry_points={"console_scripts": ["ocspchecker = ocspchecker.__main__:main"]},
     # Dependencies
     install_requires=[
-        "cryptography==3.1",
+        "cryptography==3.2",
         "nassl==3.0.0",
         "requests>=2.24",
         "validators==0.18.0"

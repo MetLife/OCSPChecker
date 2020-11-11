@@ -109,10 +109,10 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         raise Exception(f"Connection to {host}:{port} timed out.") from None
 
     except OverflowError:
-        raise Exception(f"Illegal port: {port}. Port must be between 0-65535.")
+        raise Exception(f"Illegal port: {port}. Port must be between 0-65535.") from None
 
     except TypeError:
-        raise Exception(f"Illegal port: {port}. Port must be between 0-65535.")
+        raise Exception(f"Illegal port: {port}. Port must be between 0-65535.") from None
 
     ssl_client = SslClient(
         ssl_version=OpenSslVersionEnum.SSLV23,
@@ -163,9 +163,9 @@ def extract_ocsp_url(cert_chain: List[str]) -> str:
         ).value
 
         # pylint: disable=C0200, W0212
-        for ext in range(len(aia_extensions)):
-            if aia_extensions[ext].access_method._name == "OCSP":
-                ocsp_url = aia_extensions[ext].access_location.value
+        for index, value in enumerate(aia_extensions):
+            if aia_extensions[index].access_method._name == "OCSP":
+                ocsp_url = aia_extensions[index].access_location.value
 
     except ExtensionNotFound:
         raise ValueError(

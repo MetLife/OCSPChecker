@@ -205,7 +205,7 @@ def test_a_cert_from_each_root_ca(root_ca):
     """ Test a cert from each root CA to ensure test coverage """
 
     try:
-        ocsp_request = get_ocsp_status(root_ca)
+        ocsp_request = get_ocsp_status(root_ca, 443)
 
     except Exception as err:
         raise err

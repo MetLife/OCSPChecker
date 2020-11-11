@@ -66,6 +66,6 @@ github_ocsp_data = b'0Q0O0M0K0I0\t\x06\x05+\x0e\x03\x02\x1a\x05\x00\x04\x14\xcf&
 unauthorized_ocsp_data = b'0Q0O0M0K0I0\t\x06\x05+\x0e\x03\x02\x1a\x05\x00\x04\x14\xcf&\xf5\x18\xfa\xc9~\x8f\x8c\xb3B\xe0\x1c/j\x10\x9e\x8e_\n\x04\x14Qh\xff\x90\xaf\x02\x07u<\xcc\xd9edb\xa2\x12\xb8Yr;\x02\x10\x05W\xc8\x0b(&\x83\xa1{\n\x11D)ky'
 
 # List of certificate authorities to test
-cert_authorities = ["identrust.com", "digicert.com", "sectigo.com", "godaddy.com", "globalsign.com",
+cert_authorities = ["identrust.com", "digicert.com", "sectigo.com", "www.godaddy.com", "globalsign.com",
                     "certum.pl", "actalis.it", "entrustdatacard.com", "secom.co.jp", "letsencrypt.org",
                     "trustwave.com", "wisekey.com", "networksolutions.com"]

@@ -16,3 +16,8 @@
 # v1.5.0
 - Fixed an uncaught exception when port is > 65535 or not numeric
 - Parse out http(s) when submitting a request
+
+# v1.6.0
+- Upgrade cryptography to 3.2
+- Upgrade nassl to 3.1
+- Added tox tests for Python versions 3.7 and 3.8

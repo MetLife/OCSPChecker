@@ -7,7 +7,7 @@ OCSP-Checker is a python package based on Alban Diquet's [nassl](https://github.
 
 ## Pre-requisites
 
-__Python__ - Python 3.7 (64-bit) and above.
+__Python__ - Python 3.7 and 3.8 (64-bit). Python 3.9 is not yet supported.
 
 
 ## Installation

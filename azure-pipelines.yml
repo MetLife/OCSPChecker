@@ -31,7 +31,7 @@ steps:
   displayName: 'Run Tox'
 
 - task: PublishTestResults@2
-  condition: suceededOrFailed()
+  condition: succeededOrFailed()
   inputs:
     testResultsFiles: '**/test-*.xml'
     testRunTitle: 'Publish test results for Python $(python.version)'

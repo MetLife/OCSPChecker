@@ -25,8 +25,8 @@ steps:
   displayName: 'Install tools'
 
 
-- script: python -m pip install --upgrade pytest tox pytest-cov
-  displayName: 'Install test frameworks'
+- script: python -m pip install --upgrade tox
+  displayName: 'Install Tox'
 
 - script: tox -e py
   displayName: 'Run Tox'
@@ -36,3 +36,7 @@ steps:
   inputs:
     testResultsFiles: '**/test-output.xml'
     testRunTitle: 'Publish test results for Python $(python.version)'
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    summaryFileLocation: '**/coverage.xml'

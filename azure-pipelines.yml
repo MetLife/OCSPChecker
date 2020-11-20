@@ -30,7 +30,8 @@ steps:
 - script: tox -e py
   displayName: 'Run Tox'
 
-- bash: ls -lah
+- bash: cd .tox && ls -lah
+- bash: cd tests && ls -lah
 
 - task: PublishTestResults@2
   condition: succeededOrFailed()

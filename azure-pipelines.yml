@@ -24,6 +24,7 @@ steps:
 - script: python -m pip install --upgrade pip setuptools wheel
   displayName: 'Install tools'
 
+
 - script: python -m pip install --upgrade pytest tox pytest-cov
   displayName: 'Install test frameworks'
 

@@ -21,8 +21,17 @@ steps:
   inputs:
     versionSpec: '$(python.version)'
 
-- script: python -m pip install --upgrade pip setuptools wheel pytest pytest-azurepipelines tox
+- script: python -m pip install --upgrade pip setuptools wheel
   displayName: 'Install tools'
+
+- script: python -m pip install --upgrade pytest pytest-azurepipelines tox pytest-cov
+  displayName: 'Install test frameworks'
 
 - script: tox -e py
   displayName: 'Run Tox'
+
+- task: PublishTestResults@2
+  condition: suceededOrFailed()
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish test results for Python $(python.version)'

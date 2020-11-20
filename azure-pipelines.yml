@@ -33,5 +33,5 @@ steps:
 - task: PublishTestResults@2
   condition: succeededOrFailed()
   inputs:
-    testResultsFiles: '**/test-*.xml'
+    testResultsFiles: '$(System.DefaultWorkingDirectory)/**/test-*.xml'
     testRunTitle: 'Publish test results for Python $(python.version)'

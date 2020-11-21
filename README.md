@@ -39,7 +39,7 @@ PLEASE NOTE: If you run this on a network with a MITM SSL proxy, you may receive
 
 OCSP-Checker can now be used at the command line. The format is:
 ```
-usage: ocsp-checker [-h] --target target [--port port]
+usage: ocspchecker [-h] --target target [--port port]
 
 Check the OCSP revocation status for a x509 digital certificate.
 
@@ -56,4 +56,4 @@ For example:
 
 ## Feedback
 
-Send me mail at joe@metlife.com
+Send me mail at gattjoseph@hotmail.com

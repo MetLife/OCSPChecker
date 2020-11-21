@@ -39,4 +39,5 @@ steps:
 
 - task: PublishCodeCoverageResults@1
   inputs:
+    codecoveragetool: Cobertura
     summaryFileLocation: '**/coverage.xml'

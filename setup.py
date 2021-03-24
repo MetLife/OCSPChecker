@@ -8,7 +8,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name="ocsp-checker",
-    version="1.6.0",
+    version="1.7.0",
     description="Library used to check the OCSP revocation status for a x509 digital certificate.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,6 +22,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9"
     ],
     project_urls={
         "Source": "https://github.com/MetLife/OCSPChecker",
@@ -33,8 +34,8 @@ setup(
     entry_points={"console_scripts": ["ocspchecker = ocspchecker.__main__:main"]},
     # Dependencies
     install_requires=[
-        "cryptography==3.2.1",
-        "nassl==3.1.0",
+        "cryptography==3.4.6",
+        "nassl==4.0.0",
         "requests>=2.24",
         "validators>=0.18"
         ],

@@ -21,3 +21,11 @@
 - Upgrade cryptography to 3.2
 - Upgrade nassl to 3.1
 - Added tox tests for Python versions 3.7 and 3.8
+
+# v1.7.0
+- Added support for M1 Mac's
+- Added support for Python 3.9
+- Upgraded nassl to 4.0.0
+- Upgraded cryptography to 3.4.6
+- Fixed failing tests
+- Added tox tests for Python 3.9

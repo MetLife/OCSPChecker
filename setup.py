@@ -14,7 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/MetLife/OCSPChecker",
     author="Joe Gatt",
-    author_email="joe@metlife.com",
+    author_email="gattjoseph@hotmail.com",
     license="Apache 2.0",
     classifiers=[
         "Development Status :: 3 - Alpha",

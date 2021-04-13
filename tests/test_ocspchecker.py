@@ -12,18 +12,22 @@ from . import certs
 def test_get_cert_chain_bad_host():
     """ Pass bad host to get_certificate_chain exception """
 
+    func_name: str = "get_certificate_chain"
+
     host = "nonexistenthost.com"
     port = 443
 
     with pytest.raises(Exception) as excinfo:
         get_certificate_chain(host, port)
 
-    assert str(excinfo.value) == f"{host}:{port} is invalid or not known."
+    assert str(excinfo.value) == f"{func_name}: {host}:{port} is invalid or not known."
 
 
 def test_get_cert_chain_host_timeout():
     """ Pass bad port to get_certificate_chain to force the
      connection to time out """
+
+    func_name: str = "get_certificate_chain"
 
     host = "espn.com"
     port = 65534
@@ -31,7 +35,7 @@ def test_get_cert_chain_host_timeout():
     with pytest.raises(Exception) as excinfo:
         get_certificate_chain(host, port)
 
-    assert str(excinfo.value) == f"Connection to {host}:{port} timed out."
+    assert str(excinfo.value) == f"{func_name}: Connection to {host}:{port} timed out."
 
 
 def test_get_cert_chain_success():
@@ -48,10 +52,12 @@ def test_get_cert_chain_success():
 def test_missing_ocsp_extension():
     """ edellroot.badssl.com is missing the OCSP extensions """
 
+    func_name: str = "extract_ocsp_url"
+
     host = "edellroot.badssl.com"
     port = 443
     cert_chain = get_certificate_chain(host, port)
-    error = "Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
+    error = f"{func_name}: Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
 
     with pytest.raises(Exception) as excinfo:
         extract_ocsp_url(cert_chain)
@@ -86,15 +92,19 @@ def test_build_ocsp_request_failure():
 
     cert_chain = ["blah", "blah"]
 
+    func_name: str = "build_ocsp_request"
+
     with pytest.raises(Exception) as excinfo:
         build_ocsp_request(cert_chain)
 
-    assert str(excinfo.value) == "Unable to load x509 certificate."
+    assert str(excinfo.value) == f"{func_name}: Unable to load x509 certificate."
 
 
 def test_get_ocsp_response_bad_url_format():
     """ test an unsuccessful get_ocsp_response function invocation
      with a bad url format """
+
+    func_name: str = "get_ocsp_response"
 
     ocsp_url = "badurl"
     ocsp_request_data = b"dummydata"
@@ -102,12 +112,14 @@ def test_get_ocsp_response_bad_url_format():
     with pytest.raises(Exception) as excinfo:
         get_ocsp_response(ocsp_url, ocsp_request_data)
 
-    assert str(excinfo.value) == f"URL failed validation for {ocsp_url}"
+    assert str(excinfo.value) == f"{func_name}: URL failed validation for {ocsp_url}"
 
 
 def test_get_ocsp_response_connection_error():
     """ test an unsuccessful get_ocsp_response function invocation
      with a bad url input """
+
+    func_name: str = "get_ocsp_response"
 
     ocsp_url = "http://blahhhhhhhh.com"
     ocsp_request_data = b"dummydata"
@@ -115,12 +127,14 @@ def test_get_ocsp_response_connection_error():
     with pytest.raises(Exception) as excinfo:
         get_ocsp_response(ocsp_url, ocsp_request_data)
 
-    assert str(excinfo.value) == f"Unknown Connection Error to {ocsp_url}"
+    assert str(excinfo.value) == f"{func_name}: Unknown Connection Error to {ocsp_url}"
 
 
 def test_get_ocsp_response_timeout():
     """ test an unsuccessful get_ocsp_response function invocation
      with a bad url input """
+
+    func_name: str = "get_ocsp_response"
 
     ocsp_url = "http://blah.com:65534"
     ocsp_request_data = b"dummydata"
@@ -128,7 +142,7 @@ def test_get_ocsp_response_timeout():
     with pytest.raises(Exception) as excinfo:
         get_ocsp_response(ocsp_url, ocsp_request_data)
 
-    assert str(excinfo.value) == f"Request timeout for {ocsp_url}"
+    assert str(excinfo.value) == f"{func_name}: Request timeout for {ocsp_url}"
 
 
 def test_get_ocsp_response_success():
@@ -150,12 +164,14 @@ def test_get_ocsp_response_success():
 def test_extract_ocsp_result_unauthorized():
     """ test an unsuccessful extract_ocsp_result function invocation """
 
+    func_name: str = "extract_ocsp_result"
+
     ocsp_response = get_ocsp_response("http://ocsp.digicert.com", certs.unauthorized_ocsp_data)
 
     with pytest.raises(Exception) as excinfo:
         extract_ocsp_result(ocsp_response)
 
-    assert str(excinfo.value) == "OCSP Request Error: UNAUTHORIZED"
+    assert str(excinfo.value) == f"{func_name}: OCSP Request Error: UNAUTHORIZED"
 
 
 def test_extract_ocsp_result_success():
@@ -183,21 +199,25 @@ def test_end_to_end_success_test():
 def test_end_to_end_test_bad_host():
     """ test the full function end to end """
 
+    func_name: str = "get_certificate_chain"
+
     host = "nonexistenthost.com"
     ocsp_request = get_ocsp_status(host, 443)
 
     assert ocsp_request == ['Host: nonexistenthost.com:443',
-                            'Error: nonexistenthost.com:443 is invalid or not known.']
+                            f'Error: {func_name}: nonexistenthost.com:443 is invalid or not known.']
 
 
 def test_end_to_end_test_host_timeout():
     """ test the full function end to end """
 
+    func_name: str = "get_certificate_chain"
+
     host = "espn.com"
     ocsp_request = get_ocsp_status(host, 65534)
 
     assert ocsp_request == ['Host: espn.com:65534',
-                            'Error: Connection to espn.com:65534 timed out.']
+                            f'Error: {func_name}: Connection to espn.com:65534 timed out.']
 
 
 @pytest.mark.parametrize("root_ca", certs.cert_authorities)
@@ -257,7 +277,7 @@ def test_strip_http_from_host():
     ocsp_request = get_ocsp_status(host, 443)
 
     assert ocsp_request == ['Host: http://github.com:443',\
-                           'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']
+                            'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']
 
 
 def test_strip_https_from_host():
@@ -267,4 +287,4 @@ def test_strip_https_from_host():
     ocsp_request = get_ocsp_status(host, 443)
 
     assert ocsp_request == ['Host: https://github.com:443',\
-                           'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']
+                            'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']

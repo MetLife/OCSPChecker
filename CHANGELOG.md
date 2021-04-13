@@ -29,3 +29,10 @@
 - Upgraded cryptography to 3.4.6
 - Fixed failing tests
 - Added tox tests for Python 3.9
+
+# v1.8.0
+- Fixed a bug to handle a situation when parsing a certificate with an AIA extension but no OCSP URL
+- Fixed a bug to handle a situation where the remote host is not using SSL/TLS and we attempt to do a SSL/TLS handshake
+- Fixed a bug to handle a situation where the remote host does not respond to a Client Hello
+- Prepended all exceptions with the function name for easier troubleshooting
+- Upgraded cryptography to 3.4.7 to support the latest versions of OpenSSL

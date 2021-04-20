@@ -117,17 +117,17 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         raise ValueError(f"{func_name}: {host} did not respond to the Client Hello.") from None
 
     except WantReadError as err:
-        raise ValueError(f"{func_name}: err.strerror") from None
+        raise ValueError(f"{func_name}: {err.strerror}") from None
 
     except WantX509LookupError as err:
-        raise ValueError(f"{func_name}: err.strerror") from None
+        raise ValueError(f"{func_name}: {err.strerror}") from None
 
     except OpenSSLError as err:
         if "1408F10B" in err.args[0]:
             # https://github.com/openssl/openssl/issues/6805
             raise ValueError(f"{func_name}: Remote host is not using SSL/TLS on port: {port}") from None
 
-        raise ValueError(f"{func_name}: err") from None
+        raise ValueError(f"{func_name}: {err}") from None
 
     finally:
         # shutdown() will also close the underlying socket

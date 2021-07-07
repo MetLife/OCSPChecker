@@ -150,14 +150,5 @@ test-output.xml
 # OS X
 .DS_Store
 
-# pylint
-.pylintrc
-
-# Visual Studio Code
-.vscode/
-
 # vim swap
 *.swp
-
-# Azure Functions
-local.settings.json

@@ -1,4 +1,12 @@
+certifi==2021.5.30
+cffi==1.14.5
+chardet==4.0.0
 cryptography==3.4.7
+decorator==5.0.9
+idna==2.10
 nassl==4.0.0
-requests>=2.24.0
+pycparser==2.20
+requests==2.25.1
+six==1.16.0
+urllib3==1.26.6
 validators==0.18.2

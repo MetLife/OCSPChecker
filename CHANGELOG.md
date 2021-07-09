@@ -36,3 +36,11 @@
 - Fixed a bug to handle a situation where the remote host does not respond to a Client Hello
 - Prepended all exceptions with the function name for easier troubleshooting
 - Upgraded cryptography to 3.4.7 to support the latest versions of OpenSSL
+
+# v1.8.2
+- Pinned all direct and transitive dependencies to a specific version in requirements.txt
+- add pylintrc file and pylint fixes
+- run black against code base
+- move CI from Azure DevOps to Github Actions
+- fixed a logic bug when not supplying a port
+- increased test coverage

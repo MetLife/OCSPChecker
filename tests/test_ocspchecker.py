@@ -149,12 +149,12 @@ def test_get_ocsp_response_connection_error():
     with pytest.raises(Exception) as excinfo:
         get_ocsp_response(ocsp_url, ocsp_request_data)
 
-    assert str(excinfo.value) == f"{func_name}: Unknown Connection Error to {ocsp_url}"
+    assert str(excinfo.value) == f"{func_name}: {ocsp_url} is invalid or not known."
 
 
 def test_get_ocsp_response_timeout():
     """test an unsuccessful get_ocsp_response function invocation
-    with a bad url input"""
+    with timeout"""
 
     func_name: str = "get_ocsp_response"
 
@@ -165,22 +165,6 @@ def test_get_ocsp_response_timeout():
         get_ocsp_response(ocsp_url, ocsp_request_data)
 
     assert str(excinfo.value) == f"{func_name}: Request timeout for {ocsp_url}"
-
-
-def test_get_ocsp_response_success():
-    """test an successful get_ocsp_response function invocation"""
-
-    cert_chain = get_certificate_chain("github.com", 443)
-    ocsp_url = extract_ocsp_url(cert_chain)
-    ocsp_request = build_ocsp_request(cert_chain)
-
-    ocsp_response = get_ocsp_response(ocsp_url, ocsp_request)
-
-    for header in ocsp_response.headers:
-        if "application/ocsp-response" in ocsp_response.headers[header]:
-            # There may be a better way to do this, but this proves we got a response
-            # from the OCSP server
-            assert True
 
 
 def test_extract_ocsp_result_unauthorized():

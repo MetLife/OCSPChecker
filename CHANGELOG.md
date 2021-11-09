@@ -44,3 +44,7 @@
 - move CI from Azure DevOps to Github Actions
 - fixed a logic bug when not supplying a port
 - increased test coverage
+
+# v1.9.0
+- bump all dependencies
+- remove requests library and use built-in urllib module

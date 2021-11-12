@@ -7,6 +7,7 @@
 from socket import AF_INET, gaierror, socket, SOCK_STREAM, timeout
 from typing import Any, List
 from urllib.parse import urlparse
+from urllib import request, error
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -15,7 +16,6 @@ from cryptography.hazmat.primitives.hashes import SHA1
 from cryptography.x509 import ExtensionOID, ExtensionNotFound, ocsp
 from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum, SslClient
 from nassl._nassl import OpenSSLError, WantReadError, WantX509LookupError
-import requests
 from validators import domain, url
 
 
@@ -23,8 +23,7 @@ def get_ocsp_status(host: str, port: Any = None) -> list:
     """Main function with two inputs: host, and port.
     Port defaults to TCP 443"""
 
-    if port is None:
-        port = 443
+    port = port or 443
 
     results: list = []
     results.append(f"Host: {host}:{port}")
@@ -80,6 +79,8 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
 
     func_name: str = "get_certificate_chain"
 
+    port = port or 443
+
     cert_chain: list = []
 
     soc = socket(AF_INET, SOCK_STREAM, proto=0)
@@ -119,7 +120,7 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         ssl_client.do_handshake()
         cert_chain = ssl_client.get_received_chain()
 
-    except IOError as err:
+    except IOError:
         raise ValueError(
             f"{func_name}: {host} did not respond to the Client Hello."
         ) from None
@@ -222,22 +223,24 @@ def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes):
         raise Exception(f"{func_name}: URL failed validation for {ocsp_url}")
 
     try:
-        ocsp_response = requests.post(
+        ocsp_request = request.Request(
             ocsp_url,
-            headers={"Content-Type": "application/ocsp-request"},
             data=ocsp_request_data,
-            timeout=5,
+            headers={"Content-Type": "application/ocsp-request"},
         )
 
-    except requests.exceptions.Timeout:
-        raise Exception(f"{func_name}: Request timeout for {ocsp_url}") from None
+        with request.urlopen(ocsp_request, timeout=3) as resp:
+            ocsp_response = resp.read()
 
-    except requests.exceptions.ConnectionError:
-        raise Exception(
-            f"{func_name}: Unknown Connection Error to {ocsp_url}"
-        ) from None
+    except error.URLError as err:
+        if isinstance(err.reason, timeout):
+            raise Exception(f"{func_name}: Request timeout for {ocsp_url}") from None
 
-    except requests.exceptions.RequestException:
+        if isinstance(err.reason, gaierror):
+            raise Exception(
+                f"{func_name}: {ocsp_url} is invalid or not known."
+            ) from None
+
         raise Exception(
             f"{func_name}: Unknown Connection Error to {ocsp_url}"
         ) from None
@@ -252,7 +255,7 @@ def extract_ocsp_result(ocsp_response):
     func_name: str = "extract_ocsp_result"
 
     try:
-        ocsp_response = ocsp.load_der_ocsp_response(ocsp_response.content)
+        ocsp_response = ocsp.load_der_ocsp_response(ocsp_response)
         # OCSP Response Status here:
         # https://cryptography.io/en/latest/_modules/cryptography/x509/ocsp/#OCSPResponseStatus
         # A status of 0 == OCSPResponseStatus.SUCCESSFUL

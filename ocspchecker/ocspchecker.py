@@ -180,9 +180,9 @@ def extract_ocsp_url(cert_chain: List[str]) -> str:
         ).value
 
         # pylint: disable=protected-access
-        for aia_method in aia_extension.__iter__():
-            if aia_method.access_method._name == "OCSP":
-                ocsp_url = aia_method.access_location.value
+        for aia_method in iter((aia_extension)):
+            if aia_method.__getattribute__("access_method")._name == "OCSP":
+                ocsp_url = aia_method.__getattribute__("access_location").value
 
         if ocsp_url == "":
             raise ValueError(

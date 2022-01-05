@@ -4,11 +4,13 @@
 
  For a short-term fix, I will use nassl to grab the full cert chain. """
 
+from pathlib import Path
 from socket import AF_INET, SOCK_STREAM, gaierror, socket, timeout
 from typing import Any, List
 from urllib import error, request
 from urllib.parse import urlparse
 
+import certifi
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -16,8 +18,12 @@ from cryptography.hazmat.primitives.hashes import SHA1
 from cryptography.x509 import ExtensionNotFound, ocsp
 from cryptography.x509.oid import ExtensionOID
 from nassl._nassl import OpenSSLError, WantReadError, WantX509LookupError
+from nassl.cert_chain_verifier import CertificateChainVerificationFailed
 from nassl.ssl_client import OpenSslVerifyEnum, OpenSslVersionEnum, SslClient
 from validators import domain, url
+
+# Get the local path to the ca certs
+path_to_ca_certs = Path(certifi.where())
 
 openssl_errors: dict = {
     # https://github.com/openssl/openssl/issues/6805
@@ -126,6 +132,7 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         ssl_version=OpenSslVersionEnum.SSLV23,
         underlying_socket=soc,
         ssl_verify=OpenSslVerifyEnum.NONE,
+        ssl_verify_locations=path_to_ca_certs
     )
 
     # Add Server Name Indication (SNI) extension to the Client Hello
@@ -133,7 +140,7 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
 
     try:
         ssl_client.do_handshake()
-        cert_chain = ssl_client.get_received_chain()
+        cert_chain = ssl_client.get_verified_chain()
 
     except IOError:
         raise ValueError(
@@ -142,6 +149,9 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
 
     except (WantReadError, WantX509LookupError) as err:
         raise ValueError(f"{func_name}: {err.strerror}") from None
+
+    except CertificateChainVerificationFailed:
+        raise ValueError(f"{func_name}: Certificate Verification failed for {host}.") from None
 
     except OpenSSLError as err:
         for key, value in openssl_errors.items():

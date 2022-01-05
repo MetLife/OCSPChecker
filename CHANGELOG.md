@@ -54,3 +54,4 @@
 - fixed two type checking issues with importing validators modules
 - removed a test that will never be able to run in the context of a docker container
 - Improved errors returned to the user for various OpenSSL errors
+- switch from get_received_chain to the get_verified_chain method in NaSSL to ensure the certificate is validated before we try any operations

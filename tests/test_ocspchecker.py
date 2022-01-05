@@ -69,18 +69,16 @@ def test_get_cert_chain_bad_port():
     )
 
 
-def test_missing_ocsp_extension():
-    """edellroot.badssl.com is missing the OCSP extensions"""
+def test_invalid_certificate():
+    """edellroot.badssl.com is invalid"""
 
-    func_name: str = "extract_ocsp_url"
+    func_name: str = "get_certificate_chain"
 
     host = "edellroot.badssl.com"
-    port = 443
-    cert_chain = get_certificate_chain(host, port)
-    error = f"{func_name}: Certificate AIA Extension Missing. Possible MITM Proxy."
+    error = f"{func_name}: Certificate Verification failed for {host}."
 
     with pytest.raises(Exception) as excinfo:
-        extract_ocsp_url(cert_chain)
+        get_certificate_chain(host, 443)
 
     assert str(excinfo.value) == error
 
@@ -319,21 +317,6 @@ def test_strip_https_from_host():
         "OCSP URL: http://ocsp.digicert.com",
         "OCSP Status: GOOD",
     ]
-
-
-def test_tls_fatal_alert_40():
-    """Validate SSL/TLS Handshake Failure"""
-
-    host = "fao.org"
-    func_name: str = "get_certificate_chain"
-
-    with pytest.raises(Exception) as excinfo:
-        get_certificate_chain(host, 443)
-
-    assert (
-        str(excinfo.value)
-        == f"{func_name}: SSL/TLS Handshake Failure."
-    )
 
 
 def test_tls_fatal_alert_112():

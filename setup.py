@@ -9,7 +9,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="ocsp-checker",
-    version="1.9.7",
+    version="1.9.8",
     description="Library used to check the OCSP revocation status for a x509 digital certificate.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -34,5 +34,5 @@ setup(
     packages=find_packages(include=["ocspchecker"]),
     entry_points={"console_scripts": ["ocspchecker = ocspchecker.__main__:main"]},
     # Dependencies
-    install_requires=["cryptography>=36.0", "nassl>=4.0", "validators>=0.18"],
+    install_requires=["cryptography>=36.0", "nassl>=4.0", "validators>=0.18", "certifi"],
 )

@@ -4,19 +4,34 @@
 
  For a short-term fix, I will use nassl to grab the full cert chain. """
 
-from socket import AF_INET, gaierror, socket, SOCK_STREAM, timeout
+from socket import AF_INET, SOCK_STREAM, gaierror, socket, timeout
 from typing import Any, List
+from urllib import error, request
 from urllib.parse import urlparse
-from urllib import request, error
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.hashes import SHA1
-from cryptography.x509 import ExtensionOID, ExtensionNotFound, ocsp
-from nassl.ssl_client import OpenSslVersionEnum, OpenSslVerifyEnum, SslClient
+from cryptography.x509 import ExtensionNotFound, ocsp
+from cryptography.x509.oid import ExtensionOID
 from nassl._nassl import OpenSSLError, WantReadError, WantX509LookupError
+from nassl.ssl_client import OpenSslVerifyEnum, OpenSslVersionEnum, SslClient
 from validators import domain, url
+
+openssl_errors: dict = {
+    # https://github.com/openssl/openssl/issues/6805
+     "1408F10B": "The remote host is not using SSL/TLS the port specified."
+    # TLS Fatal Alert 40 - sender was unable to negotiate an acceptable set of security
+    # parameters given the options available
+    ,"14094410": "SSL/TLS Handshake Failure."
+    # TLS Fatal Alert 112 - the server understood the ClientHello but did not recognize
+    # the server name per: https://datatracker.ietf.org/doc/html/rfc6066#section-3
+    ,"14094458": "Unrecognized server name provided. Check your target and try again."
+    # TLS Fatal Alert 50 - a field was out of the specified range
+    # or the length of the message was incorrect
+    ,"1417B109": "Decode Error. Check your target and try again."
+}
 
 
 def get_ocsp_status(host: str, port: Any = None) -> list:
@@ -129,10 +144,9 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         raise ValueError(f"{func_name}: {err.strerror}") from None
 
     except OpenSSLError as err:
-        if "1408F10B" in err.args[0]:
-            # https://github.com/openssl/openssl/issues/6805
-            raise ValueError(
-                f"{func_name}: Remote host is not using SSL/TLS on port: {port}"
+        for key, value in openssl_errors.items():
+            if key in err.args[0]:
+                raise ValueError(f"{func_name}: {value}"
             ) from None
 
         raise ValueError(f"{func_name}: {err}") from None
@@ -159,17 +173,16 @@ def extract_ocsp_url(cert_chain: List[str]) -> str:
         str.encode(cert_chain[0]), default_backend()
     )
 
-    # Check to ensure it has an AIA extension
+    # Check to ensure it has an AIA extension and if so, extract ocsp url
     try:
-        aia_extensions = certificate.extensions.get_extension_for_oid(
+        aia_extension = certificate.extensions.get_extension_for_oid(
             ExtensionOID.AUTHORITY_INFORMATION_ACCESS
         ).value
 
-        # pylint: disable=unused-variable
         # pylint: disable=protected-access
-        for index, value in enumerate(aia_extensions):
-            if aia_extensions[index].access_method._name == "OCSP":
-                ocsp_url = aia_extensions[index].access_location.value
+        for aia_method in aia_extension.__iter__():
+            if aia_method.access_method._name == "OCSP":
+                ocsp_url = aia_method.access_location.value
 
         if ocsp_url == "":
             raise ValueError(
@@ -178,7 +191,7 @@ def extract_ocsp_url(cert_chain: List[str]) -> str:
 
     except ExtensionNotFound:
         raise ValueError(
-            f"{func_name}: Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
+            f"{func_name}: Certificate AIA Extension Missing. Possible MITM Proxy."
         ) from None
 
     return ocsp_url

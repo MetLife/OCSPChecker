@@ -73,6 +73,7 @@ cert_authorities = [
     "entrustdatacard.com",
     "secom.co.jp",
     "letsencrypt.org",
+    "microsoft.com",
     "trustwave.com",
     "wisekey.com",
     "networksolutions.com",

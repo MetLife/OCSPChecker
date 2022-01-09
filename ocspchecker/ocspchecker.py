@@ -17,17 +17,25 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.hashes import SHA1
 from cryptography.x509 import ExtensionNotFound, ocsp
 from cryptography.x509.oid import ExtensionOID
-from nassl._nassl import OpenSSLError, WantReadError, WantX509LookupError
+from nassl._nassl import OpenSSLError
 from nassl.cert_chain_verifier import CertificateChainVerificationFailed
-from nassl.ssl_client import OpenSslVerifyEnum, OpenSslVersionEnum, SslClient
+from nassl.ssl_client import (
+    ClientCertificateRequested, OpenSslVerifyEnum, OpenSslVersionEnum, SslClient)
 from validators import domain, url
+
+
+class InitialConnectionError(Exception):
+    """ Custom exception class to differentiate between
+     initial connection errors and OpenSSL errors """
+    pass
+
 
 # Get the local path to the ca certs
 path_to_ca_certs = Path(certifi.where())
 
 openssl_errors: dict = {
     # https://github.com/openssl/openssl/issues/6805
-     "1408F10B": "The remote host is not using SSL/TLS the port specified."
+     "1408F10B": "The remote host is not using SSL/TLS on the port specified."
     # TLS Fatal Alert 40 - sender was unable to negotiate an acceptable set of security
     # parameters given the options available
     ,"14094410": "SSL/TLS Handshake Failure."
@@ -37,6 +45,10 @@ openssl_errors: dict = {
     # TLS Fatal Alert 50 - a field was out of the specified range
     # or the length of the message was incorrect
     ,"1417B109": "Decode Error. Check your target and try again."
+    # TLS Fatal Alert 80 - Internal Error
+    ,"14094438": "TLS Fatal Alert 80 - Internal Error."
+    # Unable to find public key parameters
+    ,"140070EF": "Unable to find public key parameters."
 }
 
 
@@ -111,22 +123,27 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         soc.connect((host, port))
 
     except gaierror:
-        raise Exception(
+        raise InitialConnectionError(
             f"{func_name}: {host}:{port} is invalid or not known."
         ) from None
 
     except timeout:
-        raise Exception(
+        raise InitialConnectionError(
             f"{func_name}: Connection to {host}:{port} timed out."
         ) from None
 
-    except (OverflowError, TypeError):
-        raise Exception(
-            f"{func_name}: Illegal port: {port}. Port must be between 0-65535."
+    except ConnectionRefusedError:
+        raise InitialConnectionError(f"{func_name}: Connection to {host}:{port} refused.") from None
+
+    except OSError:
+        raise InitialConnectionError(
+            f"{func_name}: Unable to reach the host {host}."
         ) from None
 
-    except ConnectionRefusedError:
-        raise Exception(f"{func_name}: Connection to {host}:{port} refused.") from None
+    except (OverflowError, TypeError):
+        raise InitialConnectionError(
+            f"{func_name}: Illegal port: {port}. Port must be between 0-65535."
+        ) from None
 
     ssl_client = SslClient(
         ssl_version=OpenSslVersionEnum.SSLV23,
@@ -147,11 +164,11 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
             f"{func_name}: {host} did not respond to the Client Hello."
         ) from None
 
-    except (WantReadError, WantX509LookupError) as err:
-        raise ValueError(f"{func_name}: {err.strerror}") from None
-
     except CertificateChainVerificationFailed:
         raise ValueError(f"{func_name}: Certificate Verification failed for {host}.") from None
+
+    except ClientCertificateRequested:
+        raise ValueError(f"{func_name}: Client Certificate Requested for {host}.") from None
 
     except OpenSSLError as err:
         for key, value in openssl_errors.items():

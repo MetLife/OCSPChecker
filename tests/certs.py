@@ -77,4 +77,8 @@ cert_authorities = [
     "trustwave.com",
     "wisekey.com",
     "networksolutions.com",
+    "amazontrust.com",
+    "lencr.org",
+    "comodoca.com",
+    "www.starfieldtech.com"
 ]

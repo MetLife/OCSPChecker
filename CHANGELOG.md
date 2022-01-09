@@ -49,9 +49,8 @@
 - bump all dependencies
 - remove requests library and use built-in urllib module
 
-# v1.9.5
-- created docker development environment in VS Code to work around Apple M1 compatibility issues with SSLyze/NaSSL
-- fixed two type checking issues with importing validators modules
+# v1.9.9
+- created docker development environment in VS Code to work around Apple M1 compatibility issues with NaSSL
 - removed a test that will never be able to run in the context of a docker container
 - Improved errors returned to the user for various OpenSSL errors
 - switch from get_received_chain to the get_verified_chain method in NaSSL to ensure the certificate is validated before we try any operations

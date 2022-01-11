@@ -1,16 +1,14 @@
 """ Tests """
-import subprocess
-
 import pytest
-
 from ocspchecker.ocspchecker import (
     build_ocsp_request,
+    extract_ocsp_result,
+    extract_ocsp_url,
     get_certificate_chain,
     get_ocsp_response,
-    extract_ocsp_url,
-    extract_ocsp_result,
     get_ocsp_status,
 )
+
 from . import certs
 
 
@@ -71,18 +69,16 @@ def test_get_cert_chain_bad_port():
     )
 
 
-def test_missing_ocsp_extension():
-    """edellroot.badssl.com is missing the OCSP extensions"""
+def test_invalid_certificate():
+    """edellroot.badssl.com is invalid"""
 
-    func_name: str = "extract_ocsp_url"
+    func_name: str = "get_certificate_chain"
 
     host = "edellroot.badssl.com"
-    port = 443
-    cert_chain = get_certificate_chain(host, port)
-    error = f"{func_name}: Certificate Authority Information Access (AIA) Extension Missing. Possible MITM Proxy."
+    error = f"{func_name}: Certificate Verification failed for {host}."
 
     with pytest.raises(Exception) as excinfo:
-        extract_ocsp_url(cert_chain)
+        get_certificate_chain(host, 443)
 
     assert str(excinfo.value) == error
 
@@ -260,23 +256,6 @@ def test_a_cert_from_each_root_ca(root_ca):
     assert ocsp_request[2] == "OCSP Status: GOOD"
 
 
-def test_commandline_end_to_end_test():
-    """Test the command line end to end"""
-
-    _check = None
-    command = ["ocspchecker", "-t", "github.com"]
-    result = "['Host: github.com:443', 'OCSP URL: http://ocsp.digicert.com', 'OCSP Status: GOOD']"
-
-    try:
-        _check = subprocess.run(command, capture_output=True, check=True, text=True)
-
-    except subprocess.SubprocessError as err:
-        print(err)  # This will fail if it can't find ocsp-checker on the system
-
-    # Received valid return code and no errors
-    assert _check.returncode == 0 and _check.stdout.strip() == result
-
-
 def test_bad_port_overflow():
     """Validate passing a bad port results in failure"""
 
@@ -338,3 +317,33 @@ def test_strip_https_from_host():
         "OCSP URL: http://ocsp.digicert.com",
         "OCSP Status: GOOD",
     ]
+
+
+def test_tls_fatal_alert_112():
+    """Validate Unrecognized server name provided"""
+
+    host = "nginx.net"
+    func_name: str = "get_certificate_chain"
+
+    with pytest.raises(Exception) as excinfo:
+        get_certificate_chain(host, 443)
+
+    assert (
+        str(excinfo.value)
+        == f"{func_name}: Unrecognized server name provided. Check your target and try again."
+    )
+
+
+def test_tls_fatal_alert_50():
+    """Validate SSL/TLS Decode Error"""
+
+    host = "pattern-wiki.org"
+    func_name: str = "get_certificate_chain"
+
+    with pytest.raises(Exception) as excinfo:
+        get_certificate_chain(host, 443)
+
+    assert (
+        str(excinfo.value)
+        == f"{func_name}: Decode Error. Check your target and try again."
+    )

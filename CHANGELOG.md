@@ -54,3 +54,10 @@
 - removed a test that will never be able to run in the context of a docker container
 - Improved errors returned to the user for various OpenSSL errors
 - switch from get_received_chain to the get_verified_chain method in NaSSL to ensure the certificate is validated before we try any operations
+
+# v1.9.11
+- bump all dependencies
+- moved to pyproject.toml for project definition
+- added tests for python 3.10 and 3.11
+- added coverage across macOS, Linux, and Windows
+- fixed two broken tests and commented one out for now

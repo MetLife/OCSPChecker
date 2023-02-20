@@ -20,13 +20,18 @@ from cryptography.x509.oid import ExtensionOID
 from nassl._nassl import OpenSSLError
 from nassl.cert_chain_verifier import CertificateChainVerificationFailed
 from nassl.ssl_client import (
-    ClientCertificateRequested, OpenSslVerifyEnum, OpenSslVersionEnum, SslClient)
+    ClientCertificateRequested,
+    OpenSslVerifyEnum,
+    OpenSslVersionEnum,
+    SslClient,
+)
 from validators import domain, url
 
 
 class InitialConnectionError(Exception):
-    """ Custom exception class to differentiate between
-     initial connection errors and OpenSSL errors """
+    """Custom exception class to differentiate between
+    initial connection errors and OpenSSL errors"""
+
     pass
 
 
@@ -35,20 +40,25 @@ path_to_ca_certs = Path(certifi.where())
 
 openssl_errors: dict = {
     # https://github.com/openssl/openssl/issues/6805
-     "1408F10B": "The remote host is not using SSL/TLS on the port specified."
+    "1408F10B": "The remote host is not using SSL/TLS on the port specified."
     # TLS Fatal Alert 40 - sender was unable to negotiate an acceptable set of security
     # parameters given the options available
-    ,"14094410": "SSL/TLS Handshake Failure."
+    ,
+    "14094410": "SSL/TLS Handshake Failure."
     # TLS Fatal Alert 112 - the server understood the ClientHello but did not recognize
     # the server name per: https://datatracker.ietf.org/doc/html/rfc6066#section-3
-    ,"14094458": "Unrecognized server name provided. Check your target and try again."
+    ,
+    "14094458": "Unrecognized server name provided. Check your target and try again."
     # TLS Fatal Alert 50 - a field was out of the specified range
     # or the length of the message was incorrect
-    ,"1417B109": "Decode Error. Check your target and try again."
+    ,
+    "1417B109": "Decode Error. Check your target and try again."
     # TLS Fatal Alert 80 - Internal Error
-    ,"14094438": "TLS Fatal Alert 80 - Internal Error."
+    ,
+    "14094438": "TLS Fatal Alert 80 - Internal Error."
     # Unable to find public key parameters
-    ,"140070EF": "Unable to find public key parameters."
+    ,
+    "140070EF": "Unable to find public key parameters.",
 }
 
 
@@ -133,7 +143,9 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         ) from None
 
     except ConnectionRefusedError:
-        raise InitialConnectionError(f"{func_name}: Connection to {host}:{port} refused.") from None
+        raise InitialConnectionError(
+            f"{func_name}: Connection to {host}:{port} refused."
+        ) from None
 
     except OSError:
         raise InitialConnectionError(
@@ -149,7 +161,7 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         ssl_version=OpenSslVersionEnum.SSLV23,
         underlying_socket=soc,
         ssl_verify=OpenSslVerifyEnum.NONE,
-        ssl_verify_locations=path_to_ca_certs
+        ssl_verify_locations=path_to_ca_certs,
     )
 
     # Add Server Name Indication (SNI) extension to the Client Hello
@@ -165,16 +177,19 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         ) from None
 
     except CertificateChainVerificationFailed:
-        raise ValueError(f"{func_name}: Certificate Verification failed for {host}.") from None
+        raise ValueError(
+            f"{func_name}: Certificate Verification failed for {host}."
+        ) from None
 
     except ClientCertificateRequested:
-        raise ValueError(f"{func_name}: Client Certificate Requested for {host}.") from None
+        raise ValueError(
+            f"{func_name}: Client Certificate Requested for {host}."
+        ) from None
 
     except OpenSSLError as err:
         for key, value in openssl_errors.items():
             if key in err.args[0]:
-                raise ValueError(f"{func_name}: {value}"
-            ) from None
+                raise ValueError(f"{func_name}: {value}") from None
 
         raise ValueError(f"{func_name}: {err}") from None
 

@@ -2,20 +2,25 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/docker-existing-dockerfile
 {
 	"name": "Existing Dockerfile",
-
 	// Sets the run context to one level up instead of the .devcontainer folder.
 	"context": "..",
-
 	// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 	"dockerFile": "../Dockerfile",
-
 	// Set *default* container specific settings.json values on container create.
-	"settings": {
-		"terminal.integrated.defaultProfile.linux": "bash",
-		"terminal.integrated.profiles.linux": { "bash": { "path": "bash" } } 
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.vscode-pylance",
+				"visualstudioexptteam.vscodeintellicode"
+			],
+			"terminal.integrated.defaultProfile.linux": "bash",
+			"terminal.integrated.profiles.linux": {
+				"bash": {
+					"path": "bash"
+				}
+			}
+		}
 	},
-	"extensions": ["ms-python.vscode-pylance",
-				   "visualstudioexptteam.vscodeintellicode"],
-	"postCreateCommand": "pip install --no-cache-dir --quiet -r /home/ocspdev/OcspChecker/requirements.txt",
+	"postCreateCommand": "pip install --no-cache-dir --user --quiet -r /home/ocspdev/OcspChecker/requirements.txt",
 	"remoteUser": "ocspdev"
 }

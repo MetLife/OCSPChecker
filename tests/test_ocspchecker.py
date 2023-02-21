@@ -334,16 +334,17 @@ def test_tls_fatal_alert_112():
     )
 
 
-def test_tls_fatal_alert_50():
-    """Validate SSL/TLS Decode Error"""
-
-    host = "pattern-wiki.org"
-    func_name: str = "get_certificate_chain"
-
-    with pytest.raises(Exception) as excinfo:
-        get_certificate_chain(host, 443)
-
-    assert (
-        str(excinfo.value)
-        == f"{func_name}: Decode Error. Check your target and try again."
-    )
+# Need to find another host with this error
+# def test_tls_fatal_alert_50():
+#    """Validate SSL/TLS Decode Error"""
+#
+#    host = "pattern-wiki.org"
+#    func_name: str = "get_certificate_chain"
+#
+#    with pytest.raises(Exception) as excinfo:
+#        get_certificate_chain(host, 443)
+#
+#    assert (
+#        str(excinfo.value)
+#        == f"{func_name}: Decode Error. Check your target and try again."
+#    )

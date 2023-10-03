@@ -60,10 +60,10 @@ jobs:
       - name: Install tools
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          python -m pip install twine
+          python -m pip install build twine
       - name: Build pypy package
         run: |
-          python -m setup sdist bdist_wheel
+          python -m build
       - name: Check package description
         run: |
           twine check dist/*

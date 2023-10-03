@@ -1,0 +1,5 @@
+pytest==7.4.2
+twine==4.0.2
+pylint==2.17.2
+black==23.9.1
+isort==5.12.0

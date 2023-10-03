@@ -61,3 +61,9 @@
 - added tests for python 3.10 and 3.11
 - added coverage across macOS, Linux, and Windows
 - fixed two broken tests and commented one out for now
+
+# v1.9.12
+- removed validators
+- bump all dependencies
+- added dev-requirements.txt for CI
+- removed tox

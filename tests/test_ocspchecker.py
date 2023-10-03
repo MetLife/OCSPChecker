@@ -130,7 +130,7 @@ def test_get_ocsp_response_bad_url_format():
     with pytest.raises(Exception) as excinfo:
         get_ocsp_response(ocsp_url, ocsp_request_data)
 
-    assert str(excinfo.value) == f"{func_name}: URL failed validation for {ocsp_url}"
+    assert str(excinfo.value) == (f"{func_name}: Unknown Connection Error to {ocsp_url}")
 
 
 def test_get_ocsp_response_connection_error():
@@ -225,7 +225,7 @@ def test_end_to_end_test_bad_fqdn():
 
     assert ocsp_request == [
         "Host: nonexistentdomain:443",
-        f"Error: {host} is not a valid FQDN.",
+        f"Error: get_certificate_chain: {host}:443 is invalid or not known.",
     ]
 
 
@@ -264,7 +264,7 @@ def test_bad_port_overflow():
 
     assert ocsp_request == [
         "Host: espn.com:80000",
-        "Error: Invalid port: '80000'. Port must be between 0-65535.",
+        "Error: get_certificate_chain: Illegal port: 80000. Port must be between 0-65535.",
     ]
 
 
@@ -276,7 +276,7 @@ def test_bad_port_typeerror():
 
     assert ocsp_request == [
         "Host: espn.com:a",
-        "Error: Invalid port: 'a'. Port must be between 0-65535.",
+        "Error: get_certificate_chain: Illegal port: a. Port must be between 0-65535.",
     ]
 
 

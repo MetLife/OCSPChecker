@@ -1,8 +1,5 @@
 certifi
 cffi==1.15.1
-cryptography==39.0.2
-decorator==5.1.1
+cryptography==41.0.4
 nassl==5.0.1
 pycparser==2.21
-six==1.16.0
-validators==0.20.0

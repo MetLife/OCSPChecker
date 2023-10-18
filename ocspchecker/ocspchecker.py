@@ -64,14 +64,10 @@ openssl_errors: dict = {
     "140070EF": "Unable to find public key parameters.",
 }
 
+def get_ocsp_status(host: str, port: int = 443) -> List[str]:
+    """Main function with two inputs: host and port"""
 
-def get_ocsp_status(host: str, port: Any = None) -> list:
-    """Main function with two inputs: host and port.
-    Port defaults to TCP 443"""
-
-    port = port or 443
-
-    results: list = []
+    results: List[str] = []
     results.append(f"Host: {host}:{port}")
 
     # pylint: disable=W0703
@@ -111,12 +107,10 @@ def get_ocsp_status(host: str, port: Any = None) -> list:
     return results
 
 
-def get_certificate_chain(host: str, port: int) -> List[str]:
+def get_certificate_chain(host: str, port: int = 443) -> List[str]:
     """Connect to the host on the port and obtain certificate chain"""
 
     func_name: str = "get_certificate_chain"
-
-    port = port or 443
 
     cert_chain: list = []
 

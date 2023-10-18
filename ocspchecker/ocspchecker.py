@@ -258,10 +258,10 @@ def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes):
         if isinstance(err.reason, gaierror):
             raise OcspResponderError(f"{func_name}: {ocsp_url} is invalid or not known.")
         
-        raise OcspResponderError(f"{func_name}: Unknown Connection Error to {ocsp_url}")
+        raise OcspResponderError(f"{func_name}: Connection Error to {ocsp_url}. {str(err)}")
 
     except ValueError as err:
-        raise OcspResponderError(f"{func_name}: Unknown Connection Error to {ocsp_url}")
+        raise OcspResponderError(f"{func_name}: Connection Error to {ocsp_url}. {str(err)}")
 
     return ocsp_response
 

@@ -27,6 +27,11 @@ dependencies = [
 ]
 requires-python = ">=3.7"
 
+[project.optional-dependencies]
+dev = [
+    'pytest',
+]
+
 [tools.setuptools.packages]
 find = {}
 

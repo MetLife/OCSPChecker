@@ -38,6 +38,9 @@ class OcspResponderError(Exception):
 # Get the local path to the ca certs
 path_to_ca_certs = Path(certifi.where())
 
+# Define requests timeouts, in seconds
+request_timeout = 3.0
+
 openssl_errors: dict = {
     # https://github.com/openssl/openssl/issues/6805
     "1408F10B": "The remote host is not using SSL/TLS on the port specified."
@@ -118,7 +121,7 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
     cert_chain: list = []
 
     soc = socket(AF_INET, SOCK_STREAM, proto=0)
-    soc.settimeout(3)
+    soc.settimeout(request_timeout)
 
     try:
         soc.connect((host, port))
@@ -251,7 +254,7 @@ def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes):
             headers={"Content-Type": "application/ocsp-request"},
         )
 
-        with request.urlopen(ocsp_request, timeout=3) as resp:
+        with request.urlopen(ocsp_request, timeout=request_timeout) as resp:
             ocsp_response = resp.read()
 
     except error.URLError as err:

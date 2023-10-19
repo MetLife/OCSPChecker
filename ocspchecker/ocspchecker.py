@@ -40,9 +40,6 @@ class OcspResponderError(Exception):
 # Get the local path to the ca certs
 path_to_ca_certs = Path(certifi.where())
 
-# Define requests timeouts, in seconds
-request_timeout = 3.0
-
 openssl_errors: dict = {
     # https://github.com/openssl/openssl/issues/6805
     "1408F10B": "The remote host is not using SSL/TLS on the port specified."
@@ -66,7 +63,7 @@ openssl_errors: dict = {
     "140070EF": "Unable to find public key parameters.",
 }
 
-def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None) -> List[str]:
+def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0) -> List[str]:
     """Main function with three inputs: host, port and proxy"""
 
     results: List[str] = []
@@ -85,7 +82,7 @@ def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, in
 
     try:
         # Get the remote certificate chain
-        cert_chain = get_certificate_chain(host, port, proxy=proxy)
+        cert_chain = get_certificate_chain(host, port, proxy=proxy, request_timeout=request_timeout)
 
         # Extract OCSP URL from leaf certificate
         ocsp_url = extract_ocsp_url(cert_chain)
@@ -94,7 +91,7 @@ def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, in
         ocsp_request = build_ocsp_request(cert_chain)
 
         # Send OCSP request to responder and get result
-        ocsp_response = get_ocsp_response(ocsp_url, ocsp_request, proxy=proxy)
+        ocsp_response = get_ocsp_response(ocsp_url, ocsp_request, proxy=proxy, request_timeout=request_timeout)
 
         # Extract OCSP result from OCSP response
         ocsp_result = extract_ocsp_result(ocsp_response)
@@ -109,7 +106,7 @@ def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, in
     return results
 
 
-def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None) -> List[str]:
+def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0) -> List[str]:
     """Connect to the host on the port and obtain certificate chain"""
 
     func_name: str = "get_certificate_chain"
@@ -238,7 +235,7 @@ def build_ocsp_request(cert_chain: List[str]) -> bytes:
     return ocsp_request_data
 
 
-def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes, proxy: Union[None, Tuple[str, int]] = None):
+def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0):
     """Send OCSP request to ocsp responder and retrieve response"""
 
     func_name: str = "get_ocsp_response"

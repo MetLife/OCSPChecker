@@ -67,3 +67,8 @@
 - bump all dependencies
 - added dev-requirements.txt for CI
 - removed tox
+
+# v1.9.13
+- allow usage of http proxy to request both host certificate and perform the ocsp request
+- allow configuration of request timeouts as function argument
+- add extra info in unknown exceptions

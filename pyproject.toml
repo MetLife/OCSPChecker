@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name="ocsp-checker"
-version="1.9.12"
+version="1.9.13"
 description="Library used to check the OCSP revocation status for a x509 digital certificate."
 
 readme= {file = "README.md", content-type = "text/markdown"}

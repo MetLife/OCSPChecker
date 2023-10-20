@@ -126,6 +126,7 @@ def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[s
         ) from None
 
     except timeout:
+        soc.close()
         raise InitialConnectionError(
             f"{func_name}: Connection to {host}:{port} timed out."
         ) from None

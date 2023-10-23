@@ -267,6 +267,9 @@ def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes, proxy: Union[None
     except ValueError as err:
         raise OcspResponderError(f"{func_name}: Connection Error to {ocsp_url}. {str(err)}")
 
+    except timeout:
+        raise OcspResponderError(f"{func_name}: Request timeout for {ocsp_url}")
+
     return ocsp_response
 
 

@@ -130,8 +130,7 @@ def test_get_ocsp_response_bad_url_format():
     with pytest.raises(Exception) as excinfo:
         get_ocsp_response(ocsp_url, ocsp_request_data)
 
-    assert str(excinfo.value) == (f"{func_name}: Unknown Connection Error to {ocsp_url}")
-
+    assert str(excinfo.value) == (f"{func_name}: Connection Error to {ocsp_url}. unknown url type: {ocsp_url!r}")
 
 def test_get_ocsp_response_connection_error():
     """test an unsuccessful get_ocsp_response function invocation

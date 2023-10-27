@@ -7,7 +7,7 @@
 from socket import gaierror, timeout, socket, SOCK_STREAM, AF_INET
 from urllib.parse import urlparse
 from urllib import request, error
-from typing import List, Any
+from typing import List, Tuple, Union
 from pathlib import Path
 
 from nassl.ssl_client import (
@@ -24,6 +24,8 @@ from cryptography.hazmat.primitives.hashes import SHA1
 from cryptography.x509.oid import ExtensionOID
 from nassl._nassl import OpenSSLError
 import certifi
+
+from ocspchecker.utils.http_proxy_connect import http_proxy_connect
 
 
 class InitialConnectionError(Exception):
@@ -61,14 +63,10 @@ openssl_errors: dict = {
     "140070EF": "Unable to find public key parameters.",
 }
 
+def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0) -> List[str]:
+    """Main function with three inputs: host, port and proxy"""
 
-def get_ocsp_status(host: str, port: Any = None) -> list:
-    """Main function with two inputs: host and port.
-    Port defaults to TCP 443"""
-
-    port = port or 443
-
-    results: list = []
+    results: List[str] = []
     results.append(f"Host: {host}:{port}")
 
     # pylint: disable=W0703
@@ -84,7 +82,7 @@ def get_ocsp_status(host: str, port: Any = None) -> list:
 
     try:
         # Get the remote certificate chain
-        cert_chain = get_certificate_chain(host, port)
+        cert_chain = get_certificate_chain(host, port, proxy=proxy, request_timeout=request_timeout)
 
         # Extract OCSP URL from leaf certificate
         ocsp_url = extract_ocsp_url(cert_chain)
@@ -93,7 +91,7 @@ def get_ocsp_status(host: str, port: Any = None) -> list:
         ocsp_request = build_ocsp_request(cert_chain)
 
         # Send OCSP request to responder and get result
-        ocsp_response = get_ocsp_response(ocsp_url, ocsp_request)
+        ocsp_response = get_ocsp_response(ocsp_url, ocsp_request, proxy=proxy, request_timeout=request_timeout)
 
         # Extract OCSP result from OCSP response
         ocsp_result = extract_ocsp_result(ocsp_response)
@@ -108,20 +106,19 @@ def get_ocsp_status(host: str, port: Any = None) -> list:
     return results
 
 
-def get_certificate_chain(host: str, port: int) -> List[str]:
+def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0) -> List[str]:
     """Connect to the host on the port and obtain certificate chain"""
 
     func_name: str = "get_certificate_chain"
 
-    port = port or 443
-
     cert_chain: list = []
 
     soc = socket(AF_INET, SOCK_STREAM, proto=0)
-    soc.settimeout(3)
+    soc.settimeout(request_timeout)
 
     try:
-        soc.connect((host, port))
+        if proxy is not None: http_proxy_connect((host, port), proxy=proxy, soc=soc)
+        else: soc.connect((host, port))
 
     except gaierror:
         raise InitialConnectionError(
@@ -129,6 +126,7 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
         ) from None
 
     except timeout:
+        soc.close()
         raise InitialConnectionError(
             f"{func_name}: Connection to {host}:{port} timed out."
         ) from None
@@ -136,8 +134,8 @@ def get_certificate_chain(host: str, port: int) -> List[str]:
     except ConnectionRefusedError:
         raise InitialConnectionError(f"{func_name}: Connection to {host}:{port} refused.") from None
 
-    except OSError:
-        raise InitialConnectionError(f"{func_name}: Unable to reach the host {host}.") from None
+    except (IOError, OSError) as err:
+        raise InitialConnectionError(f"{func_name}: Unable to reach the host {host}. {str(err)}") from None
 
     except (OverflowError, TypeError):
         raise InitialConnectionError(
@@ -238,7 +236,7 @@ def build_ocsp_request(cert_chain: List[str]) -> bytes:
     return ocsp_request_data
 
 
-def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes):
+def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0):
     """Send OCSP request to ocsp responder and retrieve response"""
 
     func_name: str = "get_ocsp_response"
@@ -250,8 +248,11 @@ def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes):
             data=ocsp_request_data,
             headers={"Content-Type": "application/ocsp-request"},
         )
+        if proxy is not None:
+            host, port = proxy
+            ocsp_request.set_proxy(f'{host}:{port}', 'http')
 
-        with request.urlopen(ocsp_request, timeout=3) as resp:
+        with request.urlopen(ocsp_request, timeout=request_timeout) as resp:
             ocsp_response = resp.read()
 
     except error.URLError as err:
@@ -261,10 +262,13 @@ def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes):
         if isinstance(err.reason, gaierror):
             raise OcspResponderError(f"{func_name}: {ocsp_url} is invalid or not known.")
         
-        raise OcspResponderError(f"{func_name}: Unknown Connection Error to {ocsp_url}")
+        raise OcspResponderError(f"{func_name}: Connection Error to {ocsp_url}. {str(err)}")
 
     except ValueError as err:
-        raise OcspResponderError(f"{func_name}: Unknown Connection Error to {ocsp_url}")
+        raise OcspResponderError(f"{func_name}: Connection Error to {ocsp_url}. {str(err)}")
+
+    except timeout:
+        raise OcspResponderError(f"{func_name}: Request timeout for {ocsp_url}")
 
     return ocsp_response
 

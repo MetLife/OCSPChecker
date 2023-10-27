@@ -25,9 +25,9 @@ arg_parser.add_argument(
     "--port",
     "-p",
     metavar="port",
-    type=str,
+    type=int,
     required=False,
-    default="443",
+    default=443,
     help="The port to test (default is 443)",
 )
 

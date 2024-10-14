@@ -7,7 +7,7 @@
 from socket import gaierror, timeout, socket, SOCK_STREAM, AF_INET
 from urllib.parse import urlparse
 from urllib import request, error
-from typing import List, Tuple, Union, Optional
+from typing import List, Tuple, Union
 from pathlib import Path
 
 from nassl.ssl_client import (
@@ -103,7 +103,7 @@ def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, in
     return results
 
 
-def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0, path_to_ca_certs: Optional[Path] = Path(certifi.where())) -> List[str]:
+def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0, path_to_ca_certs: Path = Path(certifi.where())) -> List[str]:
     """Connect to the host on the port and obtain certificate chain"""
 
     func_name: str = "get_certificate_chain"

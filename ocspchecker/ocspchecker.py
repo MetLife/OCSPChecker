@@ -37,9 +37,6 @@ class OcspResponderError(Exception):
     """Custom exception class to identify errors obtaining a response from a CA'a Responder"""
 
 
-# Get the local path to the ca certs
-path_to_ca_certs = Path(certifi.where())
-
 openssl_errors: dict = {
     # https://github.com/openssl/openssl/issues/6805
     "1408F10B": "The remote host is not using SSL/TLS on the port specified."
@@ -106,7 +103,7 @@ def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, in
     return results
 
 
-def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0) -> List[str]:
+def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0, path_to_ca_certs: Path = Path(certifi.where())) -> List[str]:
     """Connect to the host on the port and obtain certificate chain"""
 
     func_name: str = "get_certificate_chain"

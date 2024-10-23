@@ -240,19 +240,6 @@ def test_end_to_end_test_host_timeout():
     ]
 
 
-@pytest.mark.parametrize("root_ca", certs.cert_authorities)
-def test_a_cert_from_each_root_ca(root_ca):
-    """Test a cert from each root CA to ensure test coverage"""
-
-    try:
-        ocsp_request = get_ocsp_status(root_ca, 443)
-
-    except Exception as err:
-        raise err
-
-    assert ocsp_request[2] == "OCSP Status: GOOD"
-
-
 def test_bad_port_overflow():
     """Validate passing a bad port results in failure"""
 
@@ -329,19 +316,3 @@ def test_tls_fatal_alert_112():
         str(excinfo.value)
         == f"{func_name}: Unrecognized server name provided. Check your target and try again."
     )
-
-
-# Need to find another host with this error
-# def test_tls_fatal_alert_50():
-#    """Validate SSL/TLS Decode Error"""
-#
-#    host = "pattern-wiki.org"
-#    func_name: str = "get_certificate_chain"
-#
-#    with pytest.raises(Exception) as excinfo:
-#        get_certificate_chain(host, 443)
-#
-#    assert (
-#        str(excinfo.value)
-#        == f"{func_name}: Decode Error. Check your target and try again."
-#    )

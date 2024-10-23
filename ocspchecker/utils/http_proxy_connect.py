@@ -1,4 +1,4 @@
-'''
+"""
 Establish a socket connection through an HTTP proxy.
 Author: Fredrik Østrem <frx.apps@gmail.com>
 License:
@@ -14,7 +14,8 @@ License:
   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
   DEALINGS IN THE SOFTWARE.
-'''
+"""
+
 # This file is a copy-paste from https://gist.github.com/frxstrem/4487802
 #
 # Some fixes were made:
@@ -32,58 +33,64 @@ License:
 
 
 import socket
-from typing import Tuple, Union
 from base64 import b64encode
+from typing import Tuple, Union
 
-def http_proxy_connect(address: Tuple[str, int], proxy: Tuple[str, int], auth: Union[None, str, Tuple[str, str]] = None, soc: Union[None, socket.socket] = None) -> socket.socket:
-  """Establish a socket connection through an HTTP proxy."""
 
-  headers = {
-    'host': address[0]
-  }
+def http_proxy_connect(
+    address: Tuple[str, int],
+    proxy: Tuple[str, int],
+    auth: Union[None, str, Tuple[str, str]] = None,
+    soc: Union[None, socket.socket] = None,
+) -> socket.socket:
+    """Establish a socket connection through an HTTP proxy."""
 
-  if isinstance(auth, str):
-    headers['proxy-authorization'] = auth
-  elif isinstance(auth, tuple):
-    headers['proxy-authorization'] = 'Basic ' + b64encode(('%s:%s' % auth).encode('utf-8')).decode('utf-8')
+    headers = {"host": address[0]}
 
-  s = soc if soc is not None else socket.socket()
-  s.connect(proxy)
-  fp = s.makefile('rw')
+    if isinstance(auth, str):
+        headers["proxy-authorization"] = auth
+    elif isinstance(auth, tuple):
+        headers["proxy-authorization"] = "Basic " + b64encode(
+            ("%s:%s" % auth).encode("utf-8")
+        ).decode("utf-8")
 
-  fp.write('CONNECT %s:%d HTTP/1.0\r\n' % address)
-  fp.write('\r\n'.join('%s: %s' % (k, v) for (k, v) in headers.items()) + '\r\n\r\n')
-  fp.flush()
+    s = soc if soc is not None else socket.socket()
+    s.connect(proxy)
+    fp = s.makefile("rw")
 
-  statusline = fp.readline().rstrip('\r\n')
+    fp.write("CONNECT %s:%d HTTP/1.0\r\n" % address)
+    fp.write("\r\n".join("%s: %s" % (k, v) for (k, v) in headers.items()) + "\r\n\r\n")
+    fp.flush()
 
-  if statusline.count(' ') < 2:
+    statusline = fp.readline().rstrip("\r\n")
+
+    if statusline.count(" ") < 2:
+        fp.close()
+        s.close()
+        raise IOError("Bad response")
+    version, status, statusmsg = statusline.split(" ", 2)
+    if not version in ("HTTP/1.0", "HTTP/1.1"):
+        fp.close()
+        s.close()
+        raise IOError("Unsupported HTTP version")
+    try:
+        status = int(status)
+    except ValueError:
+        fp.close()
+        s.close()
+        raise IOError("Bad response")
+
+    response_headers = {}
+
+    while True:
+        tl = ""
+        l = fp.readline().rstrip("\r\n")
+        if l == "":
+            break
+        if not ":" in l:
+            continue
+        k, v = l.split(":", 1)
+        response_headers[k.strip().lower()] = v.strip()
+
     fp.close()
-    s.close()
-    raise IOError('Bad response')
-  version, status, statusmsg = statusline.split(' ', 2)
-  if not version in ('HTTP/1.0', 'HTTP/1.1'):
-    fp.close()
-    s.close()
-    raise IOError('Unsupported HTTP version')
-  try:
-    status = int(status)
-  except ValueError:
-    fp.close()
-    s.close()
-    raise IOError('Bad response')
-
-  response_headers = {}
-
-  while True:
-    tl = ''
-    l = fp.readline().rstrip('\r\n')
-    if l == '':
-      break
-    if not ':' in l:
-      continue
-    k, v = l.split(':', 1)
-    response_headers[k.strip().lower()] = v.strip()
-
-  fp.close()
-  return s
+    return s

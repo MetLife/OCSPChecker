@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name="ocsp-checker"
-version="1.9.13"
+version="1.9.14"
 description="Library used to check the OCSP revocation status for a x509 digital certificate."
 
 readme= {file = "README.md", content-type = "text/markdown"}
@@ -18,11 +18,12 @@ classifiers=[
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 keywords=["ssl, tls, ocsp, python, security"]
 dependencies = [
-    "cryptography~=41.0",
-    "nassl~=5.0",
+    "cryptography~=43.0",
+    "nassl~=5.2",
     "certifi",
 ]
 requires-python = ">=3.7"
@@ -47,7 +48,7 @@ ocspchecker = "ocspchecker.__main__:main"
 
 [tool.black]
 line-length = 100
-target-version = ["py37", "py38", "py39", "py310", "py311"]
+target-version = ["py37", "py38", "py39", "py310", "py311", "py312"]
 
 [tool.isort]
 ensure_newline_before_comments = true
@@ -60,7 +61,7 @@ line_length = 100
 multi_line_output = 3
 no_sections = false
 profile = "black"
-py_version=311
+py_version=312
 reverse_relative = true
 reverse_sort = true
 skip_gitignore = true
@@ -72,5 +73,5 @@ include = ["ocspchecker" , "tests"]
 reportMissingImports = true
 reportMissingTypeStubs = false
 pythonPlatform = "All"
-pythonVersion = "3.11"
+pythonVersion = "3.12"
 typeCheckingMode = "basic"

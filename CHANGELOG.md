@@ -72,3 +72,9 @@
 - allow usage of http proxy to request both host certificate and perform the ocsp request
 - allow configuration of request timeouts as function argument
 - add extra info in unknown exceptions
+
+# v1.9.14
+- allow custom path to ca-certs via @vLabayen
+- update devcontainer
+- fix flaky tests
+- update CI

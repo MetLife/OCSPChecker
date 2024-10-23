@@ -11,8 +11,21 @@
 		"vscode": {
 			"extensions": [
 				"ms-python.vscode-pylance",
-				"visualstudioexptteam.vscodeintellicode"
+				"ms-python.python",
+				"ms-python.isort",
+				"ms-python.black-formatter",
+				"ms-python.pylint"
 			],
+			"settings": {
+				"python.defaultInterpreterPath": "/usr/local/bin/python3",
+				"pylint.enabled": true,
+				"pylint.importStrategy": "fromEnvironment", // Manage pylint separate from extension
+				"pylint.lintOnChange": true,
+				"pylint.path": [
+					"/usr/local/bin/pylint"
+				],
+				"python.formatting.blackPath": "/usr/local/bin/black"
+			},
 			"terminal.integrated.defaultProfile.linux": "bash",
 			"terminal.integrated.profiles.linux": {
 				"bash": {
@@ -21,6 +34,6 @@
 			}
 		}
 	},
-	"postCreateCommand": "pip install --no-cache-dir --user --quiet -r /home/ocspdev/OcspChecker/requirements.txt",
+	"postCreateCommand": "pip install --user -r /home/ocspdev/OcspChecker/dev-requirements.txt && pip install --user -r /home/ocspdev/OcspChecker/requirements.txt",
 	"remoteUser": "ocspdev"
 }

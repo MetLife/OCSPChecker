@@ -78,3 +78,4 @@
 - update devcontainer
 - fix flaky tests
 - update CI
+- remove support for Python 3.7

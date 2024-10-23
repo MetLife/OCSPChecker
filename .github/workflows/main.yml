@@ -28,13 +28,13 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
       - name: Install pytest
         run: |
-          python -m pip install pytest pytest-cov
+          python -m pip install pytest
       - name: Install requirements
         run: |
           python -m pip install -r requirements.txt
       - name: Run pytest
         run: |
-          pytest -v --junitxml=test-output.xml --cov=ocspchecker --cov-report xml
+          pytest -v --junitxml=test-output.xml
       - name: Upload test results
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # tag=v4.4.3
         with:

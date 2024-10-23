@@ -17,12 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash-completion \
     && rm -rf /var/lib/apt/lists/*
 
-#RUN pip install --no-cache-dir --quiet --upgrade pip setuptools wheel && \
-#    pip install --no-cache-dir --quiet pytest pytest-cov && \
-#    pip install --no-cache-dir --quiet twine && \
-#    pip install --no-cache-dir --quiet pylint && \
-#    pip install --no-cache-dir --quiet black
-
 USER ocspdev
 WORKDIR /home/ocspdev
 

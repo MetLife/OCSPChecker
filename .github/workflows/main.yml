@@ -40,12 +40,12 @@ jobs:
         with:
           name: pytest-results for ${{ matrix.python-version }}
           path: "**/test-output.xml"
-      - name: Upload coverage results
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # tag=v4.4.3
-        with:
-          name: pytest-results for ${{ matrix.python-version }}
-          path: "**/coverage.xml"
-        if: ${{ always() }}
+#      - name: Upload coverage results
+#        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # tag=v4.4.3
+#        with:
+#          name: pytest-results for ${{ matrix.python-version }}
+#          path: "**/coverage.xml"
+#        if: ${{ always() }}
 
 #  build:
 #    runs-on: ubuntu-latest

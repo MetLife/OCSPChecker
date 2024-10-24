@@ -35,12 +35,12 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Run pytest
         run: |
-          pytest ../tests/test_ocspchecker.py -v --junitxml=test-output${{ matrix.os }}-python${{ matrix.python-version }}.xml
+          pytest test_ocspchecker.py -v --junitxml=test-output-${{ matrix.os }}-python${{ matrix.python-version }}.xml
       - name: Upload test results
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # tag=v4.4.3
         with:
           name: pytest-results for ${{ matrix.os }}-python${{ matrix.python-version }}
-          path: "**/test-output.xml"
+          path: "**/test-output-${{ matrix.os }}-python${{ matrix.python-version }}.xml"
 #      - name: Upload coverage results
 #        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # tag=v4.4.3
 #        with:

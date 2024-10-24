@@ -7,6 +7,20 @@
 	// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 	"dockerFile": "../Dockerfile",
 	// Set *default* container specific settings.json values on container create.
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": "false",
+			"username": "vscode",
+			"userUid": "1000",
+			"userGid": "1000",
+			"upgradePackages": "true"
+		},
+		"ghcr.io/devcontainers/features/python:1": "none",
+		"ghcr.io/devcontainers/features/git:1": {
+			"version": "latest",
+			"ppa": "false"
+		}
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -34,6 +48,6 @@
 			}
 		}
 	},
-	"postCreateCommand": "pip install --user -r /home/ocspdev/OcspChecker/dev-requirements.txt && pip install --user -r /home/ocspdev/OcspChecker/requirements.txt",
-	"remoteUser": "ocspdev"
+	"postCreateCommand": "pip install --user -r /home/vscode/OcspChecker/dev-requirements.txt && pip install --user -r /home/vscode/OcspChecker/requirements.txt",
+	"remoteUser": "vscode"
 }

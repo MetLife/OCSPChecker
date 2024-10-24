@@ -36,6 +36,7 @@ jobs:
       - name: Run pytest
         run: |
           pytest test_ocspchecker.py -v --junitxml=test-output-${{ matrix.os }}-python${{ matrix.python-version }}.xml
+        working-directory: /ocspchecker/tests
       - name: Upload test results
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # tag=v4.4.3
         with:
@@ -46,7 +47,7 @@ jobs:
 #        with:
 #          name: pytest-results for ${{ matrix.python-version }}
 #          path: "**/coverage.xml"
-#        if: ${{ always() }}
+        if: ${{ always() }}
 
 #  build:
 #    runs-on: ubuntu-latest

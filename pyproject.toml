@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="ocsp-checker"
+name="ocspchecker"
 version="1.9.14"
 description="Library used to check the OCSP revocation status for a x509 digital certificate."
 

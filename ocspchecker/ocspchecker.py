@@ -4,26 +4,26 @@
 
  For a short-term fix, I will use nassl to grab the full cert chain. """
 
-from socket import gaierror, timeout, socket, SOCK_STREAM, AF_INET
-from urllib.parse import urlparse
-from urllib import request, error
-from typing import List, Tuple, Union
 from pathlib import Path
+from socket import AF_INET, SOCK_STREAM, gaierror, socket, timeout
+from typing import List, Tuple, Union
+from urllib import error, request
+from urllib.parse import urlparse
 
-from nassl.ssl_client import (
-    ClientCertificateRequested,
-    OpenSslVersionEnum,
-    OpenSslVerifyEnum,
-    SslClient,
-)
-from cryptography.x509 import load_pem_x509_certificate, ocsp, ExtensionNotFound
-from nassl.cert_chain_verifier import CertificateChainVerificationFailed
-from cryptography.hazmat.primitives import serialization
+import certifi
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.hashes import SHA1
+from cryptography.x509 import ExtensionNotFound, load_pem_x509_certificate, ocsp
 from cryptography.x509.oid import ExtensionOID
 from nassl._nassl import OpenSSLError
-import certifi
+from nassl.cert_chain_verifier import CertificateChainVerificationFailed
+from nassl.ssl_client import (
+    ClientCertificateRequested,
+    OpenSslVerifyEnum,
+    OpenSslVersionEnum,
+    SslClient,
+)
 
 from ocspchecker.utils.http_proxy_connect import http_proxy_connect
 
@@ -60,7 +60,13 @@ openssl_errors: dict = {
     "140070EF": "Unable to find public key parameters.",
 }
 
-def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0) -> List[str]:
+
+def get_ocsp_status(
+    host: str,
+    port: int = 443,
+    proxy: Union[None, Tuple[str, int]] = None,
+    request_timeout: float = 3.0,
+) -> List[str]:
     """Main function with three inputs: host, port and proxy"""
 
     results: List[str] = []
@@ -88,7 +94,9 @@ def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, in
         ocsp_request = build_ocsp_request(cert_chain)
 
         # Send OCSP request to responder and get result
-        ocsp_response = get_ocsp_response(ocsp_url, ocsp_request, proxy=proxy, request_timeout=request_timeout)
+        ocsp_response = get_ocsp_response(
+            ocsp_url, ocsp_request, proxy=proxy, request_timeout=request_timeout
+        )
 
         # Extract OCSP result from OCSP response
         ocsp_result = extract_ocsp_result(ocsp_response)
@@ -103,7 +111,13 @@ def get_ocsp_status(host: str, port: int = 443, proxy: Union[None, Tuple[str, in
     return results
 
 
-def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0, path_to_ca_certs: Path = Path(certifi.where())) -> List[str]:
+def get_certificate_chain(
+    host: str,
+    port: int = 443,
+    proxy: Union[None, Tuple[str, int]] = None,
+    request_timeout: float = 3.0,
+    path_to_ca_certs: Path = Path(certifi.where()),
+) -> List[str]:
     """Connect to the host on the port and obtain certificate chain"""
 
     func_name: str = "get_certificate_chain"
@@ -114,8 +128,16 @@ def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[s
     soc.settimeout(request_timeout)
 
     try:
-        if proxy is not None: http_proxy_connect((host, port), proxy=proxy, soc=soc)
-        else: soc.connect((host, port))
+        if path_to_ca_certs.is_file():
+            pass
+    except FileNotFoundError:
+        raise OSError(f"ca cert file {path_to_ca_certs} not found") from None
+
+    try:
+        if proxy is not None:
+            http_proxy_connect((host, port), proxy=proxy, soc=soc)
+        else:
+            soc.connect((host, port))
 
     except gaierror:
         raise InitialConnectionError(
@@ -132,7 +154,9 @@ def get_certificate_chain(host: str, port: int = 443, proxy: Union[None, Tuple[s
         raise InitialConnectionError(f"{func_name}: Connection to {host}:{port} refused.") from None
 
     except (IOError, OSError) as err:
-        raise InitialConnectionError(f"{func_name}: Unable to reach the host {host}. {str(err)}") from None
+        raise InitialConnectionError(
+            f"{func_name}: Unable to reach the host {host}. {str(err)}"
+        ) from None
 
     except (OverflowError, TypeError):
         raise InitialConnectionError(
@@ -233,7 +257,12 @@ def build_ocsp_request(cert_chain: List[str]) -> bytes:
     return ocsp_request_data
 
 
-def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes, proxy: Union[None, Tuple[str, int]] = None, request_timeout: float = 3.0):
+def get_ocsp_response(
+    ocsp_url: str,
+    ocsp_request_data: bytes,
+    proxy: Union[None, Tuple[str, int]] = None,
+    request_timeout: float = 3.0,
+):
     """Send OCSP request to ocsp responder and retrieve response"""
 
     func_name: str = "get_ocsp_response"
@@ -247,7 +276,7 @@ def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes, proxy: Union[None
         )
         if proxy is not None:
             host, port = proxy
-            ocsp_request.set_proxy(f'{host}:{port}', 'http')
+            ocsp_request.set_proxy(f"{host}:{port}", "http")
 
         with request.urlopen(ocsp_request, timeout=request_timeout) as resp:
             ocsp_response = resp.read()
@@ -258,7 +287,7 @@ def get_ocsp_response(ocsp_url: str, ocsp_request_data: bytes, proxy: Union[None
 
         if isinstance(err.reason, gaierror):
             raise OcspResponderError(f"{func_name}: {ocsp_url} is invalid or not known.")
-        
+
         raise OcspResponderError(f"{func_name}: Connection Error to {ocsp_url}. {str(err)}")
 
     except ValueError as err:

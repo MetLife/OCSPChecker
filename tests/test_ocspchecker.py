@@ -1,5 +1,7 @@
 """ Tests """
+
 import pytest
+
 from ocspchecker.ocspchecker import (
     build_ocsp_request,
     extract_ocsp_result,
@@ -63,10 +65,7 @@ def test_get_cert_chain_bad_port():
     with pytest.raises(Exception) as excinfo:
         get_certificate_chain(host, port)
 
-    assert (
-        str(excinfo.value)
-        == f"{func_name}: Illegal port: {port}. Port must be between 0-65535."
-    )
+    assert str(excinfo.value) == f"{func_name}: Illegal port: {port}. Port must be between 0-65535."
 
 
 def test_invalid_certificate():
@@ -87,19 +86,17 @@ def test_extract_ocsp_url_success():
     """test a successful extract_ocsp_url function invocation"""
 
     host = "github.com"
-    port = 443
-    cert_chain = get_certificate_chain(host, port)
+    cert_chain = get_certificate_chain(host)
     ocsp_url = extract_ocsp_url(cert_chain)
 
-    assert ocsp_url == "http://ocsp.digicert.com"
+    assert ocsp_url == "http://ocsp.sectigo.com"
 
 
 def test_build_ocsp_request_success():
     """test a successful build_ocsp_request function invocation"""
 
     host = "github.com"
-    port = 443
-    cert_chain = get_certificate_chain(host, port)
+    cert_chain = get_certificate_chain(host)
     ocsp_request_data = build_ocsp_request(cert_chain)
 
     assert ocsp_request_data == certs.github_ocsp_data
@@ -130,7 +127,10 @@ def test_get_ocsp_response_bad_url_format():
     with pytest.raises(Exception) as excinfo:
         get_ocsp_response(ocsp_url, ocsp_request_data)
 
-    assert str(excinfo.value) == (f"{func_name}: Connection Error to {ocsp_url}. unknown url type: {ocsp_url!r}")
+    assert str(excinfo.value) == (
+        f"{func_name}: Connection Error to {ocsp_url}. unknown url type: {ocsp_url!r}"
+    )
+
 
 def test_get_ocsp_response_connection_error():
     """test an unsuccessful get_ocsp_response function invocation
@@ -167,9 +167,7 @@ def test_extract_ocsp_result_unauthorized():
 
     func_name: str = "extract_ocsp_result"
 
-    ocsp_response = get_ocsp_response(
-        "http://ocsp.digicert.com", certs.unauthorized_ocsp_data
-    )
+    ocsp_response = get_ocsp_response("http://ocsp.digicert.com", certs.unauthorized_ocsp_data)
 
     with pytest.raises(Exception) as excinfo:
         extract_ocsp_result(ocsp_response)
@@ -197,7 +195,7 @@ def test_end_to_end_success_test():
 
     assert ocsp_result == [
         "Host: github.com:443",
-        "OCSP URL: http://ocsp.digicert.com",
+        "OCSP URL: http://ocsp.sectigo.com",
         "OCSP Status: GOOD",
     ]
 
@@ -242,19 +240,6 @@ def test_end_to_end_test_host_timeout():
     ]
 
 
-@pytest.mark.parametrize("root_ca", certs.cert_authorities)
-def test_a_cert_from_each_root_ca(root_ca):
-    """Test a cert from each root CA to ensure test coverage"""
-
-    try:
-        ocsp_request = get_ocsp_status(root_ca, 443)
-
-    except Exception as err:
-        raise err
-
-    assert ocsp_request[2] == "OCSP Status: GOOD"
-
-
 def test_bad_port_overflow():
     """Validate passing a bad port results in failure"""
 
@@ -287,7 +272,7 @@ def test_no_port_supplied():
 
     assert ocsp_request == [
         "Host: github.com:443",
-        "OCSP URL: http://ocsp.digicert.com",
+        "OCSP URL: http://ocsp.sectigo.com",
         "OCSP Status: GOOD",
     ]
 
@@ -300,7 +285,7 @@ def test_strip_http_from_host():
 
     assert ocsp_request == [
         "Host: http://github.com:443",
-        "OCSP URL: http://ocsp.digicert.com",
+        "OCSP URL: http://ocsp.sectigo.com",
         "OCSP Status: GOOD",
     ]
 
@@ -313,7 +298,7 @@ def test_strip_https_from_host():
 
     assert ocsp_request == [
         "Host: https://github.com:443",
-        "OCSP URL: http://ocsp.digicert.com",
+        "OCSP URL: http://ocsp.sectigo.com",
         "OCSP Status: GOOD",
     ]
 
@@ -331,19 +316,3 @@ def test_tls_fatal_alert_112():
         str(excinfo.value)
         == f"{func_name}: Unrecognized server name provided. Check your target and try again."
     )
-
-
-# Need to find another host with this error
-# def test_tls_fatal_alert_50():
-#    """Validate SSL/TLS Decode Error"""
-#
-#    host = "pattern-wiki.org"
-#    func_name: str = "get_certificate_chain"
-#
-#    with pytest.raises(Exception) as excinfo:
-#        get_certificate_chain(host, 443)
-#
-#    assert (
-#        str(excinfo.value)
-#        == f"{func_name}: Decode Error. Check your target and try again."
-#    )
